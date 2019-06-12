@@ -91,11 +91,11 @@ If showing page numbers, this is the format that will be used.
 By default format is %p/%m which converts to current/max.
 
 ## Events
-[`create`](https://example.com/)
+[`create`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#create)
 
 Emitted from build() when the first page has finished building.
 
-[`stop`](https://example.com)
+[`stop`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#delete)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
