@@ -6,6 +6,10 @@ import {
     ReactionCollector,
     Attachment,
     FileOptions,
+    DMChannel,
+    GroupDMChannel,
+    Collection,
+    MessageReaction,
 } from "discord.js";
 import { EventEmitter } from "events";
 
@@ -36,15 +40,16 @@ class EmbedBuilder extends EventEmitter {
     private hasColor: boolean = false;
     private emojis: Emojis[] = [];
     private usingPages: boolean = true;
-    private collection: ReactionCollector;
-    private channel: TextChannel;
-    private time: number;
-    private back: string;
-    private next: string;
-    private stop: string;
-    private first: string;
-    private last: string;
+    private collection: ReactionCollector | undefined;
+    private channel: TextChannel | DMChannel | GroupDMChannel | undefined;
+    private time: number = 60000;
+    private back: string | undefined;
+    private next: string | undefined;
+    private stop: string | undefined;
+    private first: string | undefined;
+    private last: string | undefined;
     private usingPageNumber: boolean = true;
+    private pageFormat: string = '%p/%m';
 
     /**
      * 
@@ -56,10 +61,25 @@ class EmbedBuilder extends EventEmitter {
     }
 
     /**
+     *
+     * @param format The format that the footer will use to display page number (if enabled).
+     * ```javascript
+     * // %p = current page
+     * // %m = the amount of pages there are
+     * embedBuilder.setPageFormat('Page (%p/%m)');
+     * // -> Page (1/3)
+     * ```
+     */
+    public setPageFormat(format: string) {
+        this.pageFormat = format;
+        return this;
+    }
+
+    /**
      * 
      * @param channel The channel the embed will be sent to.
      */
-    public setChannel(channel: TextChannel) {
+    public setChannel(channel: TextChannel | DMChannel | GroupDMChannel) {
         this.channel = channel;
         return this;
     }
@@ -274,12 +294,16 @@ class EmbedBuilder extends EventEmitter {
     }
 
     /**
-     * Cancel the EmbedBuilder
+     * Cancels the EmbedBuilder
+     * @emits stop
      */
     public cancel(callback?: () => void) {
-        this.collection.stop();
-        if (callback)
-            callback();
+        if (this.collection) {
+            this.collection.stop();
+            if (callback)
+                callback();
+        } else
+            throw new Error('The collection has not yet started');
         return this;
     }
 
@@ -294,16 +318,16 @@ class EmbedBuilder extends EventEmitter {
             const values = Object.values(emojis[i]);
             this.addEmoji(keys[i], values[i]);
         }
-        console.log(this.emojis);
         return this;
     }
 
     /**
      * Builds the embed.
      * @emits stop
+     * @emits create
      */
     public build() {
-        if (!this.channel || !this.embedArray.length || !this.time) throw new Error('A channel, an array of embeds, and time is required!');
+        if (!this.channel || !this.embedArray.length) throw new Error('A channel, an array of embeds, and time is required!');
         const back = this.back ? this.back : '◀';
         const first = this.first ? this.first : '⏪';
         const stop = this.stop ? this.stop : '⏹';
@@ -313,7 +337,11 @@ class EmbedBuilder extends EventEmitter {
             this._setColor(0x2872DB);
         let page = 0;
         if (this.usingPageNumber)
-            this.embedArray[page].setFooter(`Page 1/${this.embedArray.length}`);
+            this.embedArray[page].setFooter(
+                this.pageFormat
+                    .replace('%p', (page + 1).toString())
+                    .replace('%m', this.embedArray.length.toString())
+            );
         this.channel.send(this.embedArray[page]).then(async sent => {
             if (sent instanceof Array) throw new Error('Got multiple messages instead of one');
             if (this.usingPages && this.embedArray.length > 1) {
@@ -327,6 +355,7 @@ class EmbedBuilder extends EventEmitter {
                 for (let i = 0; i < this.emojis.length; i++)
                     await sent.react(this.emojis[i].emoji);
             }
+            this.emit('create', sent, sent.reactions);
             const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id && reaction.remove(user), {
                 time: this.time,
             }).on('end', () => {
@@ -361,7 +390,11 @@ class EmbedBuilder extends EventEmitter {
                         return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                 }
                 if (this.usingPageNumber)
-                    this.embedArray[page].setFooter(`Page ${page + 1} / ${this.embedArray.length}`);
+                    this.embedArray[page].setFooter(
+                        this.pageFormat
+                            .replace('%p', (page + 1).toString())
+                            .replace('%m', this.embedArray.length.toString())
+                    );
                 sent.edit(this.embedArray[page]);
             });
             this.collection = collection;
@@ -373,9 +406,14 @@ class EmbedBuilder extends EventEmitter {
 namespace EmbedBuilder {
     /**
      * Emitted when the builder has stopped.
-     * @event
+     * @event stop
      */
     declare function stop(sent: Message, lastPage: number, collector: ReactionCollector): void;
+    /**
+     * Emitted when the builder is finished creating the first page.
+     * @event create
+     */
+    declare function create(sent: Message, reactions: Collection<string, MessageReaction>): void;
 }
 
 export = EmbedBuilder;

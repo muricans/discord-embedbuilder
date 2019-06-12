@@ -11,39 +11,39 @@ npm module to make creating embeds with mutliple pages a little bit easier
 ## Methods
 All methods that have the same names as the ones from [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
 
-```usePages(use)```
+`usePages(use)`
 
 If this is set to false, the builder will not use the next, back, last, first, stop emotes.
 
-```setChannel(channel)```
+`setChannel(channel)`
 
 The channel that is set here will be the channel the pages are sent to.
 
-```setEmbeds(embeds)```
+`setEmbeds(embeds)`
 
 The array of RichEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
 
-```addEmbed(embed)```
+`addEmbed(embed)`
 
 Adds a RichEmbed to the array of embeds.
 
-```concatEmbeds(embeds)```
+`concatEmbeds(embeds)`
 
 Puts the array of embeds given at the end of the current embeds array.
 
-```setTime(time)```
+`setTime(time)`
 
 This will set how long the builder should listen for emotes. Make sure to set your time as milliseconds.
 
-```getEmbeds()```
+`getEmbeds()`
 
 Returns the current embeds that the builder has.
 
-```setBackEmoji, setNextEmoji, setFirstEmoji, setLastEmoji, setStopEmoji```
+`setBackEmoji, setNextEmoji, setFirstEmoji, setLastEmoji, setStopEmoji`
 
 Insert a unicode emoji into one of these methods, and the embedbuilder will use it as the corresponding method name.
 
-```addEmoji(emoji, (sent, page, builder, emoji))```
+`addEmoji(emoji, (sent, page, builder, emoji))`
 
 This will insert the provided emoji into the builder, and when it is clicked it will perform the action that is provided.
 
@@ -55,7 +55,7 @@ builder.addEmoji('❗', (sent, page, emoji) => {
 });
 ```
 
-```addEmoji(emojiList)```
+`addEmoji(emojiList)`
 
 Add multiple emojis to do different actions.
 
@@ -70,19 +70,34 @@ builder.addEmojis([{
 ```
 
 
-```deleteEmoji(emoji)```
+`deleteEmoji(emoji)`
 
 Deletes an emoji from the list of emojis.
 
-```cancel(callback?)```
+`cancel(callback?)`
 
 Cancels the builder before the timer ends.
 
 If a callback is provided, it will execute after the builder has canceled.
 
-```showPageNumber(use)```
+`showPageNumber(use)`
 
 If set to true (by default it is true), it will show the current page on the footer of the embed. (Page x/y)
+
+`setPageFormat(format)`
+
+If showing page numbers, this is the format that will be used.
+
+By default format is %p/%m which converts to current/max.
+
+## Events
+[`create`](https://example.com/)
+
+Emitted from build() when the first page has finished building.
+
+[`stop`](https://example.com)
+
+Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
 ## Example
 First import discord-embedbuilder into your project.
