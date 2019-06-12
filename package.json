@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "types": "src/index.d.ts",
   "scripts": {
-    "build": "tsc"
+    "build": "tsc & ./typedoc/bin/typedoc"
   },
   "keywords": [
     "discord.js",

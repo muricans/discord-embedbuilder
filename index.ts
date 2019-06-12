@@ -3,17 +3,24 @@ import {
     RichEmbed,
     Message,
     ColorResolvable,
-    Collection,
+    ReactionCollector,
+    Attachment,
+    FileOptions,
 } from "discord.js";
+import { EventEmitter } from "events";
 
 interface Emojis {
     emoji: string;
-    do: (sent: Message, page: number, builder: EmbedBuilder, emoji: string) => void;
+    do: (sent: Message, page: number, emoji: string) => void;
+}
+
+interface MEmojis {
+    name: (sent: Message, page: number, emoji: string) => void;
 }
 
 /**
  * Builds an embed with a number of pages based on how many are in the RichEmbed array given.
- * @example
+ * ```javascript
  * const myEmbeds = [new Discord.RichEmbed().addField('This is', 'a field!'),
  *  new Discord.RichEmbed().addField('This is', 'another field!')];
  * embedBuilder
@@ -22,13 +29,14 @@ interface Emojis {
  *  .setEmbeds(myEmbeds)
  *  .build();
  * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
+ * ```
  */
-class EmbedBuilder {
+class EmbedBuilder extends EventEmitter {
     private embedArray: RichEmbed[] = [];
     private hasColor: boolean = false;
     private emojis: Emojis[] = [];
     private usingPages: boolean = true;
-    private collection: Collection;
+    private collection: ReactionCollector;
     private channel: TextChannel;
     private time: number;
     private back: string;
@@ -36,12 +44,13 @@ class EmbedBuilder {
     private stop: string;
     private first: string;
     private last: string;
+    private usingPageNumber: boolean = true;
 
     /**
      * 
      * @param use Use the page system for the embed.
      */
-    usePages(use: boolean) {
+    public usePages(use: boolean) {
         this.usingPages = use;
         return this;
     }
@@ -50,8 +59,18 @@ class EmbedBuilder {
      * 
      * @param channel The channel the embed will be sent to.
      */
-    setChannel(channel: TextChannel) {
+    public setChannel(channel: TextChannel) {
         this.channel = channel;
+        return this;
+    }
+
+    /**
+     * Adds the embeds given to the end of the current embeds array.
+     * 
+     * @param embedArray The embeds given here will be put at the end of the current embed array.
+     */
+    public concatEmbeds(embedArray: RichEmbed[]) {
+        this.embedArray.concat(embedArray);
         return this;
     }
 
@@ -59,7 +78,7 @@ class EmbedBuilder {
      * 
      * @param embedArray The array of embeds to use.
      */
-    setEmbeds(embedArray: RichEmbed[]) {
+    public setEmbeds(embedArray: RichEmbed[]) {
         this.embedArray = embedArray;
         return this;
     }
@@ -68,7 +87,7 @@ class EmbedBuilder {
      * 
      * @param time The amount of time the bot will allow reactions for.
      */
-    setTime(time: number) {
+    public setTime(time: number) {
         this.time = time;
         return this;
     }
@@ -77,7 +96,7 @@ class EmbedBuilder {
      * 
      * @param embed The embed to push to the array of embeds.
      */
-    addEmbed(embed: RichEmbed) {
+    public addEmbed(embed: RichEmbed) {
         this.embedArray.push(embed);
         return this;
     }
@@ -85,53 +104,95 @@ class EmbedBuilder {
     /**
      * @returns {RichEmbed[]} The current embeds that this builder has.
      */
-    getEmbeds() {
+    public getEmbeds() {
         return this.embedArray;
     }
 
-    setTitle(title: string) {
-        this._all((i: number) => {
+    public setTitle(title: string) {
+        this._all((i) => {
             this.embedArray[i].setTitle(title);
         });
         return this;
     }
 
-    setFooter(text: any, icon?: string) {
-        this._all((i: number) => {
+    public setFooter(text: any, icon?: string) {
+        this._all((i) => {
             this.embedArray[i].setFooter(text, icon);
         });
         return this;
     }
 
-    addField(name: any, value: any, inline?: boolean) {
-        this._all((i: number) => {
+    public setDescription(description: any) {
+        this._all(i => {
+            this.embedArray[i].setDescription(description);
+        });
+        return this;
+    }
+
+    public setImage(url: string) {
+        this._all(i => {
+            this.embedArray[i].setImage(url);
+        });
+        return this;
+    }
+
+    public setThumbnail(url: string) {
+        this._all(i => {
+            this.embedArray[i].setThumbnail(url);
+        });
+        return this;
+    }
+
+    public addBlankField(inline?: boolean) {
+        this._all(i => {
+            this.embedArray[i].addBlankField(inline);
+        });
+        return this;
+    }
+
+    public attachFile(file: string | Attachment | FileOptions) {
+        this._all(i => {
+            this.embedArray[i].attachFile(file);
+        });
+        return this;
+    }
+
+    public attachFiles(files: string[] | Attachment[] | FileOptions[]) {
+        this._all(i => {
+            this.embedArray[i].attachFiles(files);
+        });
+        return this;
+    }
+
+    public addField(name: any, value: any, inline?: boolean) {
+        this._all((i) => {
             this.embedArray[i].addField(name, value, inline);
         });
         return this;
     }
 
-    setURL(url: string) {
-        this._all((i: number) => {
+    public setURL(url: string) {
+        this._all((i) => {
             this.embedArray[i].setURL(url);
         });
         return this;
     }
 
-    setAuthor(name: any, icon?: string, url?: string) {
-        this._all((i: number) => {
+    public setAuthor(name: any, icon?: string, url?: string) {
+        this._all((i) => {
             this.embedArray[i].setAuthor(name, icon, url);
         });
         return this;
     }
 
-    setTimestamp(timestamp?: Date | number) {
-        this._all((i: number) => {
+    public setTimestamp(timestamp?: Date | number) {
+        this._all((i) => {
             this.embedArray[i].setTimestamp(timestamp);
         });
         return this;
     }
 
-    _all(index: (i: number) => void) {
+    private _all(index: (i: number) => void) {
         for (let i = 0; i < this.embedArray.length; i++)
             index(i);
     }
@@ -139,7 +200,7 @@ class EmbedBuilder {
     /**
      * Set the emoji for going backwards.
      */
-    setBackEmoji(unicodeEmoji: string) {
+    public setBackEmoji(unicodeEmoji: string) {
         this.back = unicodeEmoji;
         return this;
     }
@@ -147,7 +208,7 @@ class EmbedBuilder {
     /**
      * Set the emoji for going forward.
      */
-    setNextEmoji(unicodeEmoji: string) {
+    public setNextEmoji(unicodeEmoji: string) {
         this.next = unicodeEmoji;
         return this;
     }
@@ -155,7 +216,7 @@ class EmbedBuilder {
     /**
      * Set the emoji to stop the embed from listening for reactions.
      */
-    setStopEmoji(unicodeEmoji: string) {
+    public setStopEmoji(unicodeEmoji: string) {
         this.stop = unicodeEmoji;
         return this;
     }
@@ -163,7 +224,7 @@ class EmbedBuilder {
     /**
      * Set the emoji to go to the first page.
      */
-    setFirstEmoji(unicodeEmoji: string) {
+    public setFirstEmoji(unicodeEmoji: string) {
         this.first = unicodeEmoji;
         return this;
     }
@@ -171,7 +232,7 @@ class EmbedBuilder {
     /**
      * Set the emoji to go the the last page.
      */
-    setLastEmoji(unicodeEmoji: string) {
+    public setLastEmoji(unicodeEmoji: string) {
         this.last = unicodeEmoji;
         return this;
     }
@@ -179,26 +240,25 @@ class EmbedBuilder {
     /**
      * Add an emoji which will perform it's own action when pressed.
      */
-    addEmoji(unicodeEmoji: string, func: (sent: Message, page: number, builder: EmbedBuilder, emoji: string) => void) {
+    public addEmoji(unicodeEmoji: string, func: (sent: Message, page: number, emoji: string) => void) {
         this.emojis.push({
             emoji: unicodeEmoji,
             do: func,
         });
         return this;
-
     }
 
     /**
      * Deletes an emoji from the emoji list
      */
-    deleteEmoji(unicodeEmoji: string) {
+    public deleteEmoji(unicodeEmoji: string) {
         const index = this.emojis.find(emoji => emoji.emoji === unicodeEmoji);
         if (!index) throw new Error('Emoji was undefined');
         this.emojis.splice(this.emojis.indexOf(index), 1);
         return this;
     }
 
-    setColor(color: ColorResolvable) {
+    public setColor(color: ColorResolvable) {
         this._all((i) => {
             this.embedArray[i].setColor(color);
         });
@@ -206,7 +266,7 @@ class EmbedBuilder {
         return this;
     }
 
-    _setColor(color: ColorResolvable) {
+    private _setColor(color: ColorResolvable) {
         this._all((i) => {
             this.embedArray[i].setColor(color);
         });
@@ -216,17 +276,33 @@ class EmbedBuilder {
     /**
      * Cancel the EmbedBuilder
      */
-    cancel(callback?: () => void) {
+    public cancel(callback?: () => void) {
         this.collection.stop();
         if (callback)
             callback();
         return this;
     }
 
+    public showPageNumber(use: boolean) {
+        this.usingPageNumber = use;
+        return this;
+    }
+
+    public addEmojis(emojis: MEmojis[]) {
+        for (let i = 0; i < emojis.length; i++) {
+            const keys = Object.keys(emojis[i]);
+            const values = Object.values(emojis[i]);
+            this.addEmoji(keys[i], values[i]);
+        }
+        console.log(this.emojis);
+        return this;
+    }
+
     /**
      * Builds the embed.
+     * @emits stop
      */
-    build() {
+    public build() {
         if (!this.channel || !this.embedArray.length || !this.time) throw new Error('A channel, an array of embeds, and time is required!');
         const back = this.back ? this.back : '◀';
         const first = this.first ? this.first : '⏪';
@@ -236,6 +312,8 @@ class EmbedBuilder {
         if (!this.hasColor)
             this._setColor(0x2872DB);
         let page = 0;
+        if (this.usingPageNumber)
+            this.embedArray[page].setFooter(`Page 1/${this.embedArray.length}`);
         this.channel.send(this.embedArray[page]).then(async sent => {
             if (sent instanceof Array) throw new Error('Got multiple messages instead of one');
             if (this.usingPages && this.embedArray.length > 1) {
@@ -254,6 +332,7 @@ class EmbedBuilder {
             }).on('end', () => {
                 if (!this.hasColor)
                     sent.edit(this.embedArray[page].setColor(0xE21717));
+                this.emit('stop', sent, page, collection);
             });
             collection.on('collect', reaction => {
                 if (this.usingPages && this.embedArray.length > 1) {
@@ -279,13 +358,24 @@ class EmbedBuilder {
                 }
                 for (let i = 0; i < this.emojis.length; i++) {
                     if (reaction.emoji.name === this.emojis[i].emoji)
-                        return this.emojis[i].do(sent, page, this, this.emojis[i].emoji);
+                        return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                 }
+                if (this.usingPageNumber)
+                    this.embedArray[page].setFooter(`Page ${page + 1} / ${this.embedArray.length}`);
                 sent.edit(this.embedArray[page]);
             });
             this.collection = collection;
         });
+        return this;
     }
+}
+
+namespace EmbedBuilder {
+    /**
+     * Emitted when the builder has stopped.
+     * @event
+     */
+    declare function stop(sent: Message, lastPage: number, collector: ReactionCollector): void;
 }
 
 export = EmbedBuilder;

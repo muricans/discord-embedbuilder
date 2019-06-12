@@ -4,3 +4,7 @@ node_modules
 tsconfig.json
 out
 .DS_Store
+test
+docs
+typedoc.js
+typedoc

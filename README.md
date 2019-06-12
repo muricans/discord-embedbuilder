@@ -21,6 +21,14 @@ The channel that is set here will be the channel the pages are sent to.
 
 The array of RichEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
 
+```addEmbed(embed)```
+
+Adds a RichEmbed to the array of embeds.
+
+```concatEmbeds(embeds)```
+
+Puts the array of embeds given at the end of the current embeds array.
+
 ```setTime(time)```
 
 This will set how long the builder should listen for emotes. Make sure to set your time as milliseconds.
@@ -38,12 +46,27 @@ Insert a unicode emoji into one of these methods, and the embedbuilder will use 
 This will insert the provided emoji into the builder, and when it is clicked it will perform the action that is provided.
 
 ```javascript
-builder.addEmoji('❗', (sent, page, builder, emoji) => {
+builder.addEmoji('❗', (sent, page, emoji) => {
     sent.delete();
     builder.cancel();
     sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
 });
 ```
+
+```addEmoji(emojiList)```
+
+Add multiple emojis to do different actions.
+
+```javascript
+builder.addEmojis([{
+    '❗': (sent, page, emoji) => {
+        sent.delete();
+        builder.cancel();
+        sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
+    },
+}]);
+```
+
 
 ```deleteEmoji(emoji)```
 
@@ -54,6 +77,10 @@ Deletes an emoji from the list of emojis.
 Cancels the builder before the timer ends.
 
 If a callback is provided, it will execute after the builder has canceled.
+
+```showPageNumber(use)```
+
+If set to true (by default it is true), it will show the current page on the footer of the embed. (Page x/y)
 
 ## Example
 First import discord-embedbuilder into your project.
