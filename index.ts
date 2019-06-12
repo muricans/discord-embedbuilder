@@ -216,7 +216,7 @@ class EmbedBuilder {
     /**
      * Cancel the EmbedBuilder
      */
-    cancel(callback: () => void) {
+    cancel(callback?: () => void) {
         this.collection.stop();
         if (callback)
             callback();
