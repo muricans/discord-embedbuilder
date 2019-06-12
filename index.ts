@@ -1,24 +1,30 @@
 import {
     TextChannel,
-    RichEmbed,
+    MessageEmbed,
     Message,
     ColorResolvable,
     ReactionCollector,
-    Attachment,
     FileOptions,
     DMChannel,
-    GroupDMChannel,
     Collection,
     MessageReaction,
+    MessageAttachment,
 } from "discord.js";
 import { EventEmitter } from "events";
 
+/**
+ * @private
+ * @ignore
+ */
 interface Emojis {
     emoji: string;
     do: (sent: Message, page: number, emoji: string) => void;
 }
 
-interface MEmojis {
+/**
+ * @private
+ */
+interface MultipleEmojis {
     name: (sent: Message, page: number, emoji: string) => void;
 }
 
@@ -34,14 +40,15 @@ interface MEmojis {
  *  .build();
  * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
  * ```
+ * @noInheritDoc
  */
 class EmbedBuilder extends EventEmitter {
-    private embedArray: RichEmbed[] = [];
+    private embedArray: MessageEmbed[] = [];
     private hasColor: boolean = false;
     private emojis: Emojis[] = [];
     private usingPages: boolean = true;
     private collection: ReactionCollector | undefined;
-    private channel: TextChannel | DMChannel | GroupDMChannel | undefined;
+    private channel: TextChannel | DMChannel | undefined;
     private time: number = 60000;
     private back: string | undefined;
     private next: string | undefined;
@@ -50,6 +57,34 @@ class EmbedBuilder extends EventEmitter {
     private last: string | undefined;
     private usingPageNumber: boolean = true;
     private pageFormat: string = '%p/%m';
+
+    /**
+     * This calculates pages for the builder to work with.
+     * ```javascript
+     * // This will generate a builder with a data length set to an array
+     * // It will have 10 fields per page, which will all be inline, containing username and points data.
+     * embedBuilder.calculatePages(users.length, 10, (embed, i) => {
+     *  embed.addField(users[i].username, users[i].points, true);
+     * });
+     * ```
+     * 
+     * @param data This is amount of data to process.
+     * @param dataPerPage This is how much data you want displayed per page.
+     * @param insert Gives you an embed and the current index.
+     */
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void) {
+        let multiplier = 1;
+        for (let i = 0; i < dataPerPage * multiplier; i++) {
+            if (i === data)
+                break;
+            if (!this.embedArray[multiplier - 1])
+                this.embedArray.push(new MessageEmbed());
+            insert(this.embedArray[multiplier - 1], i);
+            if (i === (dataPerPage * multiplier) - 1)
+                multiplier++;
+        }
+        return this;
+    }
 
     /**
      * 
@@ -79,7 +114,7 @@ class EmbedBuilder extends EventEmitter {
      * 
      * @param channel The channel the embed will be sent to.
      */
-    public setChannel(channel: TextChannel | DMChannel | GroupDMChannel) {
+    public setChannel(channel: TextChannel | DMChannel) {
         this.channel = channel;
         return this;
     }
@@ -89,7 +124,7 @@ class EmbedBuilder extends EventEmitter {
      * 
      * @param embedArray The embeds given here will be put at the end of the current embed array.
      */
-    public concatEmbeds(embedArray: RichEmbed[]) {
+    public concatEmbeds(embedArray: MessageEmbed[]) {
         this.embedArray.concat(embedArray);
         return this;
     }
@@ -98,7 +133,7 @@ class EmbedBuilder extends EventEmitter {
      * 
      * @param embedArray The array of embeds to use.
      */
-    public setEmbeds(embedArray: RichEmbed[]) {
+    public setEmbeds(embedArray: MessageEmbed[]) {
         this.embedArray = embedArray;
         return this;
     }
@@ -116,7 +151,7 @@ class EmbedBuilder extends EventEmitter {
      * 
      * @param embed The embed to push to the array of embeds.
      */
-    public addEmbed(embed: RichEmbed) {
+    public addEmbed(embed: MessageEmbed) {
         this.embedArray.push(embed);
         return this;
     }
@@ -170,14 +205,14 @@ class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public attachFile(file: string | Attachment | FileOptions) {
+    public spliceField(index: number, deleteCount: number, name?: any, value?: any, inline?: boolean) {
         this._all(i => {
-            this.embedArray[i].attachFile(file);
+            this.embedArray[i].spliceField(index, deleteCount, name, value, inline);
         });
         return this;
     }
 
-    public attachFiles(files: string[] | Attachment[] | FileOptions[]) {
+    public attachFiles(files: string[] | MessageAttachment[] | FileOptions[]) {
         this._all(i => {
             this.embedArray[i].attachFiles(files);
         });
@@ -312,7 +347,20 @@ class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public addEmojis(emojis: MEmojis[]) {
+    /**
+     * ```javascript
+    * builder.addEmojis([{
+    * '❗': (sent, page, emoji) => {
+    *   sent.delete();
+    *   builder.cancel();
+    *   sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
+    * },
+    * }]);
+    *```
+     * 
+     * @param emojis The list of emojis to push.
+     */
+    public addEmojis(emojis: MultipleEmojis[]) {
         for (let i = 0; i < emojis.length; i++) {
             const keys = Object.keys(emojis[i]);
             const values = Object.values(emojis[i]);
@@ -356,14 +404,15 @@ class EmbedBuilder extends EventEmitter {
                     await sent.react(this.emojis[i].emoji);
             }
             this.emit('create', sent, sent.reactions);
-            const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id && reaction.remove(user), {
+            const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id, {
                 time: this.time,
             }).on('end', () => {
                 if (!this.hasColor)
                     sent.edit(this.embedArray[page].setColor(0xE21717));
                 this.emit('stop', sent, page, collection);
             });
-            collection.on('collect', reaction => {
+            collection.on('collect', (reaction, user) => {
+                reaction.users.remove(user);
                 if (this.usingPages && this.embedArray.length > 1) {
                     switch (reaction.emoji.name) {
                         case first:

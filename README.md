@@ -55,7 +55,7 @@ builder.addEmoji('❗', (sent, page, emoji) => {
 });
 ```
 
-`addEmoji(emojiList)`
+`addEmojis(emojiList)`
 
 Add multiple emojis to do different actions.
 
@@ -68,7 +68,6 @@ builder.addEmojis([{
     },
 }]);
 ```
-
 
 `deleteEmoji(emoji)`
 
@@ -89,6 +88,20 @@ If set to true (by default it is true), it will show the current page on the foo
 If showing page numbers, this is the format that will be used.
 
 By default format is %p/%m which converts to current/max.
+
+`calculatePages(data, dataPerPage, insert)`
+
+This calculates pages for the builder to work with.
+
+```javascript
+/*
+This will generate a builder with a data length set to an array.
+It will have 10 fields per page, which will all be inline, containing username and points data.
+*/
+embedBuilder.calculatePages(users.length, 10, (embed, i) => {
+    embed.addField(users[i].username, users[i].points, true);
+});
+```
 
 ## Events
 [`create`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#create)
