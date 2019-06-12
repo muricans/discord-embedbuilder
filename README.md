@@ -3,6 +3,8 @@
 
 npm module to make creating embeds with mutliple pages a little bit easier
 
+[Documentation](https://muricans.github.io/embedbuilder)
+
 ## Quick Install
 `npm install discord-embedbuilder`
 
