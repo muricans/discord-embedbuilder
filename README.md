@@ -1,5 +1,10 @@
 # discord-embedbuilder
+[![NPM](https://nodei.co/npm/discord-embedbuilder.png?downloads=true)](https://nodei.co/npm/discord-embedbuilder)
+
 npm module to make creating embeds with mutliple pages a little bit easier
+
+## Quick Install
+`npm install discord-embedbuilder`
 
 ## Methods
 All methods that have the same names as the ones from [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
