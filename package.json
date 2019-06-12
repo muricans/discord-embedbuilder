@@ -1,6 +1,6 @@
 {
   "name": "discord-embedbuilder",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "description": "Build embeds easily for discord.js",
   "main": "src/index.js",
   "types": "src/index.d.ts",
