@@ -157,7 +157,7 @@ client.on('message', message => {
 });
 ```
 
-Here's an example taken from my bot [mbot](https://github.com/muricans/mbot)
+Here's an example taken from my bot [mbot](https://github.com/muricans/mbot/tree/v12-testing)
 
 ```javascript
 module.exports = {
@@ -183,32 +183,9 @@ function leaderboard(channel, client) {
             });
         }
         users.sort((a, b) => (a.points > b.points) ? -1 : 1);
-        let pages = 0;
-        let m = 1;
-        for (let i = 0; i < 10 * m; i++) {
-            if (i === 50)
-                break;
-            if (!embeds.getEmbeds()[m - 1] && users[i]) {
-                embeds.addEmbed(new Discord.MessageEmbed());
-                pages++;
-            }
-            if (i === (10 * m) - 1)
-                m++;
-        }
-        let multiplier = 1;
-        for (let i = 0; i < 10 * multiplier; i++) {
-            if (i === 50) {
-                break;
-            }
-            if (users[i]) {
-                embeds.getEmbeds()[multiplier - 1]
-                    .addField(`${i + 1}. ${users[i].username}`, users[i].points, true)
-                    .setFooter(`Page ${multiplier}/${pages}`);
-                if (i === (10 * multiplier) - 1) {
-                    multiplier++;
-                }
-            }
-        }
+        embeds.calculatePages(users.length, 10, (embed, i) => {
+            embed.addField(`${i + 1}. ${users[i].username}`, users[i].points, true);
+        });
         embeds
             .setTitle('Points Leaderboard')
             .setTime(2 * 60000)
