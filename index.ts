@@ -18,10 +18,6 @@ interface Emojis {
     do: (sent: Message, page: number, emoji: string) => void;
 }
 
-interface MEmojis {
-    name: (sent: Message, page: number, emoji: string) => void;
-}
-
 /**
  * Builds an embed with a number of pages based on how many are in the RichEmbed array given.
  * ```javascript
@@ -34,6 +30,7 @@ interface MEmojis {
  *  .build();
  * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
  * ```
+ * @noInheritDoc
  */
 class EmbedBuilder extends EventEmitter {
     private embedArray: RichEmbed[] = [];
@@ -50,6 +47,40 @@ class EmbedBuilder extends EventEmitter {
     private last: string | undefined;
     private usingPageNumber: boolean = true;
     private pageFormat: string = '%p/%m';
+
+    constructor(channel?: TextChannel | DMChannel | GroupDMChannel) {
+        super();
+        if (channel)
+            this.channel = channel;
+    }
+
+    /**
+    * This calculates pages for the builder to work with.
+    * ```javascript
+    * // This will generate a builder with a data length set to an array
+    * // It will have 10 fields per page, which will all be inline, containing username and points data.
+    * embedBuilder.calculatePages(users.length, 10, (embed, i) => {
+    *  embed.addField(users[i].username, users[i].points, true);
+    * });
+    * ```
+    *
+    * @param data This is amount of data to process.
+    * @param dataPerPage This is how much data you want displayed per page.
+    * @param insert Gives you an embed and the current index.
+    */
+    public calculatePages(data: number, dataPerPage: number, insert: (embed: RichEmbed, index: number) => void) {
+        let multiplier = 1;
+        for (let i = 0; i < dataPerPage * multiplier; i++) {
+            if (i === data)
+                break;
+            if (!this.embedArray[multiplier - 1])
+                this.embedArray.push(new RichEmbed());
+            insert(this.embedArray[multiplier - 1], i);
+            if (i === (dataPerPage * multiplier) - 1)
+                multiplier++;
+        }
+        return this;
+    }
 
     /**
      * 
@@ -312,12 +343,9 @@ class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public addEmojis(emojis: MEmojis[]) {
-        for (let i = 0; i < emojis.length; i++) {
-            const keys = Object.keys(emojis[i]);
-            const values = Object.values(emojis[i]);
-            this.addEmoji(keys[i], values[i]);
-        }
+    public addEmojis(emojis: Emojis[]) {
+        for (let i = 0; i < emojis.length; i++)
+            this.addEmoji(emojis[i].emoji, emojis[i].do);
         return this;
     }
 
