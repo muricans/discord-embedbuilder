@@ -9,6 +9,7 @@ import {
     Collection,
     MessageReaction,
     MessageAttachment,
+    User,
 } from "discord.js";
 import { EventEmitter } from "events";
 
@@ -18,7 +19,14 @@ import { EventEmitter } from "events";
  */
 interface Emoji {
     emoji: string;
-    do: (sent: Message, page: number, emoji: string) => void;
+    do: (sent: Message, page: number, emoji: string) => void | undefined;
+}
+
+/**
+ * @private
+ */
+interface Emojis {
+    emoji: (sent: Message, page: number, emoji: string) => void;
 }
 
 /**
@@ -225,9 +233,9 @@ class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public attachFiles(files: string[] | MessageAttachment[] | FileOptions[]) {
+    public attachFiles(file: (string | MessageAttachment | FileOptions)[]) {
         this._all(i => {
-            this.embedArray[i].attachFiles(files);
+            this.embedArray[i].attachFiles(file);
         });
         return this;
     }
@@ -260,6 +268,9 @@ class EmbedBuilder extends EventEmitter {
         return this;
     }
 
+    /**
+     * @ignore
+     */
     private _all(index: (i: number) => void) {
         for (let i = 0; i < this.embedArray.length; i++)
             index(i);
@@ -334,6 +345,9 @@ class EmbedBuilder extends EventEmitter {
         return this;
     }
 
+    /**
+     * @ignore
+     */
     private _setColor(color: ColorResolvable) {
         this._all((i) => {
             this.embedArray[i].setColor(color);
@@ -362,25 +376,34 @@ class EmbedBuilder extends EventEmitter {
 
     /**
      * ```javascript
-     * builder.addEmojis([{
-     *   emoji: '❗',
-     *   do(sent, page, emoji) => {
-     *       sent.delete();
-     *       builder.cancel();
-     *       sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
-     *   },
-     * }]);
+     * builder.addEmojis({
+     *  '❗': (sent, page, emoji) => {
+     *      builder.cancel();
+     *      sent.delete();
+     *      sent.channel.send(`A new message ${emoji}\nThe page you were on before was ${page}`);
+     *  }
+     * });
      * ```
      * 
      * @param emojis The list of emojis to push.
      */
-    public addEmojis(emojis: Emoji[]) {
-        for (let i = 0; i < emojis.length; i++) {
-            this.addEmoji(emojis[i].emoji, emojis[i].do);
+    public addEmojis(emojis: Emojis | Emoji[]) {
+        if (emojis instanceof Array) {
+            process.emitWarning('Use a single object to add emojis instead.', 'DeprecationWarning');
+            for (let i = 0; i < emojis.length; i++)
+                this.addEmoji(emojis[i].emoji, emojis[i].do);
+        } else {
+            const keys = Object.keys(emojis);
+            const values = Object.values(emojis);
+            for (let i = 0; i < keys.length; i++)
+                this.addEmoji(keys[i], values[i]);
         }
         return this;
     }
 
+    /**
+     * @ignore
+     */
     private _pageFooter(sent: Message, page: number) {
         if (this.usingPageNumber)
             this.embedArray[page].setFooter(
@@ -415,6 +438,11 @@ class EmbedBuilder extends EventEmitter {
             );
         this.channel.send(this.embedArray[page]).then(async sent => {
             if (sent instanceof Array) throw new Error('Got multiple messages instead of one');
+            let author: User;
+            if (sent.author)
+                author = sent.author;
+            else
+                throw new Error('Author was not a user!');
             if (this.usingPages && this.embedArray.length > 1) {
                 await sent.react(back);
                 await sent.react(first);
@@ -428,7 +456,7 @@ class EmbedBuilder extends EventEmitter {
                 }
             }
             this.emit('create', sent, sent.reactions);
-            const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id, {
+            const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
                 time: this.time,
             }).on('end', () => {
                 if (!this.hasColor)

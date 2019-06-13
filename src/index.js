@@ -187,9 +187,9 @@ class EmbedBuilder extends events_1.EventEmitter {
         });
         return this;
     }
-    attachFiles(files) {
+    attachFiles(file) {
         this._all(i => {
-            this.embedArray[i].attachFiles(files);
+            this.embedArray[i].attachFiles(file);
         });
         return this;
     }
@@ -217,6 +217,9 @@ class EmbedBuilder extends events_1.EventEmitter {
         });
         return this;
     }
+    /**
+     * @ignore
+     */
     _all(index) {
         for (let i = 0; i < this.embedArray.length; i++)
             index(i);
@@ -283,6 +286,9 @@ class EmbedBuilder extends events_1.EventEmitter {
         this.hasColor = true;
         return this;
     }
+    /**
+     * @ignore
+     */
     _setColor(color) {
         this._all((i) => {
             this.embedArray[i].setColor(color);
@@ -309,24 +315,34 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      * ```javascript
-     * builder.addEmojis([{
-     *   emoji: '❗',
-     *   do(sent, page, emoji) => {
-     *       sent.delete();
-     *       builder.cancel();
-     *       sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
-     *   },
-     * }]);
+     * builder.addEmojis({
+     *  '❗': (sent, page, emoji) => {
+     *      builder.cancel();
+     *      sent.delete();
+     *      sent.channel.send(`A new message ${emoji}\nThe page you were on before was ${page}`);
+     *  }
+     * });
      * ```
      *
      * @param emojis The list of emojis to push.
      */
     addEmojis(emojis) {
-        for (let i = 0; i < emojis.length; i++) {
-            this.addEmoji(emojis[i].emoji, emojis[i].do);
+        if (emojis instanceof Array) {
+            process.emitWarning('Use a single object to add emojis instead.', 'DeprecationWarning');
+            for (let i = 0; i < emojis.length; i++)
+                this.addEmoji(emojis[i].emoji, emojis[i].do);
+        }
+        else {
+            const keys = Object.keys(emojis);
+            const values = Object.values(emojis);
+            for (let i = 0; i < keys.length; i++)
+                this.addEmoji(keys[i], values[i]);
         }
         return this;
     }
+    /**
+     * @ignore
+     */
     _pageFooter(sent, page) {
         if (this.usingPageNumber)
             this.embedArray[page].setFooter(this.pageFormat
@@ -358,6 +374,11 @@ class EmbedBuilder extends events_1.EventEmitter {
         this.channel.send(this.embedArray[page]).then((sent) => __awaiter(this, void 0, void 0, function* () {
             if (sent instanceof Array)
                 throw new Error('Got multiple messages instead of one');
+            let author;
+            if (sent.author)
+                author = sent.author;
+            else
+                throw new Error('Author was not a user!');
             if (this.usingPages && this.embedArray.length > 1) {
                 yield sent.react(back);
                 yield sent.react(first);
@@ -371,7 +392,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                 }
             }
             this.emit('create', sent, sent.reactions);
-            const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id, {
+            const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
                 time: this.time,
             }).on('end', () => {
                 if (!this.hasColor)

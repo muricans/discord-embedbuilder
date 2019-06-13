@@ -6,7 +6,13 @@ import { EventEmitter } from "events";
  */
 interface Emoji {
     emoji: string;
-    do: (sent: Message, page: number, emoji: string) => void;
+    do: (sent: Message, page: number, emoji: string) => void | undefined;
+}
+/**
+ * @private
+ */
+interface Emojis {
+    emoji: (sent: Message, page: number, emoji: string) => void;
 }
 /**
  * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
@@ -37,7 +43,6 @@ declare class EmbedBuilder extends EventEmitter {
     private last;
     private usingPageNumber;
     private pageFormat;
-  
     constructor(channel?: TextChannel | DMChannel);
     /**
      * This calculates pages for the builder to work with.
@@ -115,11 +120,14 @@ declare class EmbedBuilder extends EventEmitter {
     setThumbnail(url: string): this;
     addBlankField(inline?: boolean): this;
     spliceField(index: number, deleteCount: number, name?: any, value?: any, inline?: boolean): this;
-    attachFiles(files: string[] | MessageAttachment[] | FileOptions[]): this;
+    attachFiles(file: (string | MessageAttachment | FileOptions)[]): this;
     addField(name: any, value: any, inline?: boolean): this;
     setURL(url: string): this;
     setAuthor(name: any, icon?: string, url?: string): this;
     setTimestamp(timestamp?: Date | number): this;
+    /**
+     * @ignore
+     */
     private _all;
     /**
      * Set the emoji for going backwards.
@@ -150,6 +158,9 @@ declare class EmbedBuilder extends EventEmitter {
      */
     deleteEmoji(unicodeEmoji: string): this;
     setColor(color: ColorResolvable): this;
+    /**
+     * @ignore
+     */
     private _setColor;
     /**
      * Cancels the EmbedBuilder
@@ -159,19 +170,21 @@ declare class EmbedBuilder extends EventEmitter {
     showPageNumber(use: boolean): this;
     /**
      * ```javascript
-     * builder.addEmojis([{
-     *   emoji: '❗',
-     *   do(sent, page, emoji) => {
-     *       sent.delete();
-     *       builder.cancel();
-     *       sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
-     *   },
-     * }]);
+     * builder.addEmojis({
+     *  '❗': (sent, page, emoji) => {
+     *      builder.cancel();
+     *      sent.delete();
+     *      sent.channel.send(`A new message ${emoji}\nThe page you were on before was ${page}`);
+     *  }
+     * });
      * ```
      *
      * @param emojis The list of emojis to push.
      */
-    addEmojis(emojis: Emoji[]): this;
+    addEmojis(emojis: Emojis | Emoji[]): this;
+    /**
+     * @ignore
+     */
     private _pageFooter;
     /**
      * Builds the embed.
