@@ -123,7 +123,7 @@ client.on('message', message => {
         .setTime(60000); // Time is in milliseconds
     const myEmbedArray = [
         new Discord.RichEmbed().addField('1st', 'page'),
-        new Discord.RichEmbed().addField('2nd', 'page'), 
+        new Discord.RichEmbed().addField('2nd', 'page'),
         new Discord.RichEmbed().addField('3rd', 'page'),
     ];
     builder
