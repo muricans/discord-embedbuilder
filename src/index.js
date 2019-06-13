@@ -226,6 +226,7 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      * Set the emoji for going backwards.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setBackEmoji(unicodeEmoji) {
         this.back = unicodeEmoji;
@@ -233,6 +234,7 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      * Set the emoji for going forward.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setNextEmoji(unicodeEmoji) {
         this.next = unicodeEmoji;
@@ -240,6 +242,7 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      * Set the emoji to stop the embed from listening for reactions.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setStopEmoji(unicodeEmoji) {
         this.stop = unicodeEmoji;
@@ -247,6 +250,7 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      * Set the emoji to go to the first page.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setFirstEmoji(unicodeEmoji) {
         this.first = unicodeEmoji;
@@ -254,6 +258,7 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      * Set the emoji to go the the last page.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setLastEmoji(unicodeEmoji) {
         this.last = unicodeEmoji;
@@ -337,6 +342,34 @@ class EmbedBuilder extends events_1.EventEmitter {
             const values = Object.values(emojis);
             for (let i = 0; i < keys.length; i++)
                 this.addEmoji(keys[i], values[i]);
+        }
+        return this;
+    }
+    /**
+     * Replaces current type of emoji given with the new emoji provided.
+     *
+     * @param emoji The type of page emoji to replace. Types: back, first, stop, last, next.
+     * @param newEmoji This emoji will replace the current page emoji for the given type.
+     */
+    setPageEmoji(emoji, newEmoji) {
+        switch (emoji) {
+            case "back":
+                this.back = newEmoji;
+                break;
+            case "first":
+                this.first = newEmoji;
+                break;
+            case "stop":
+                this.stop = newEmoji;
+                break;
+            case "last":
+                this.last = newEmoji;
+                break;
+            case "next":
+                this.next = newEmoji;
+                break;
+            default:
+                throw new Error('Unreconized emoji name. Use types: bacl, first, stop, last or next');
         }
         return this;
     }

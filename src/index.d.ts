@@ -2,7 +2,6 @@ import { TextChannel, MessageEmbed, Message, ColorResolvable, FileOptions, DMCha
 import { EventEmitter } from "events";
 /**
  * @private
- * @ignore
  */
 interface Emoji {
     emoji: string;
@@ -131,22 +130,27 @@ declare class EmbedBuilder extends EventEmitter {
     private _all;
     /**
      * Set the emoji for going backwards.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setBackEmoji(unicodeEmoji: string): this;
     /**
      * Set the emoji for going forward.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setNextEmoji(unicodeEmoji: string): this;
     /**
      * Set the emoji to stop the embed from listening for reactions.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setStopEmoji(unicodeEmoji: string): this;
     /**
      * Set the emoji to go to the first page.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setFirstEmoji(unicodeEmoji: string): this;
     /**
      * Set the emoji to go the the last page.
+     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
      */
     setLastEmoji(unicodeEmoji: string): this;
     /**
@@ -182,6 +186,13 @@ declare class EmbedBuilder extends EventEmitter {
      * @param emojis The emojis to push.
      */
     addEmojis(emojis: Emojis | Emoji[]): this;
+    /**
+     * Replaces current type of emoji given with the new emoji provided.
+     *
+     * @param emoji The type of page emoji to replace. Types: back, first, stop, last, next.
+     * @param newEmoji This emoji will replace the current page emoji for the given type.
+     */
+    setPageEmoji(emoji: string, newEmoji: string): this;
     /**
      * Builds the embed.
      * @emits stop

@@ -115,6 +115,12 @@ embedBuilder.calculatePages(users.length, 10, (embed, i) => {
 
 Updates the current page to the one set there. This checks if the page is valid itself. Make sure the first page of the builder has already gone through before using this.
 
+`setPageEmoji(emoji, newEmoji)`
+
+Replaces current type of emoji given with the new emoji provided.
+
+Types allowed: back, first, stop, last, next
+
 ## Events
 [`create`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#create)
 
@@ -124,7 +130,7 @@ Emitted from build() when the first page has finished building.
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-['pageUpdate'](https://muricans.github.io/embedbuilder/v12/classes/embedbuilder.html#pageUpdate)
+['pageUpdate'](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#pageUpdate)
 
 Emitted from updatePage(). Sets the new page for the bot.
 
