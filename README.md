@@ -8,6 +8,10 @@ npm module to make creating embeds with mutliple pages a little bit easier
 ## Quick Install
 `npm install discord-embedbuilder`
 
+For discord.js v12
+
+`npm install muricans/discord-embedbuilder#v12`
+
 ## Methods
 All methods that have the same names as the ones from [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
 
