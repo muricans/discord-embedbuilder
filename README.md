@@ -65,7 +65,8 @@ Add multiple emojis to do different actions.
 
 ```javascript
 builder.addEmojis([{
-    '❗': (sent, page, emoji) => {
+    emoji: '❗',
+    do(sent, page, emoji) => {
         sent.delete();
         builder.cancel();
         sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
@@ -107,6 +108,10 @@ embedBuilder.calculatePages(users.length, 10, (embed, i) => {
 });
 ```
 
+`updatePage(page)`
+
+Updates the current page to the one set there. This checks if the page is valid itself. Make sure the first page of the builder has already gone through before using this.
+
 ## Events
 [`create`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#create)
 
@@ -115,6 +120,10 @@ Emitted from build() when the first page has finished building.
 [`stop`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#delete)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
+
+['pageUpdate'](https://muricans.github.io/embedbuilder/v12/classes/embedbuilder.html#pageUpdate)
+
+Emitted from updatePage(). Sets the new page for the bot.
 
 ## Example
 First import discord-embedbuilder into your project.

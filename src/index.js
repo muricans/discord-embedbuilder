@@ -24,8 +24,8 @@ const events_1 = require("events");
  * @noInheritDoc
  */
 class EmbedBuilder extends events_1.EventEmitter {
-    constructor() {
-        super(...arguments);
+    constructor(channel) {
+        super();
         this.embedArray = [];
         this.hasColor = false;
         this.emojis = [];
@@ -33,6 +33,9 @@ class EmbedBuilder extends events_1.EventEmitter {
         this.time = 60000;
         this.usingPageNumber = true;
         this.pageFormat = '%p/%m';
+        if (channel) {
+            this.channel = channel;
+        }
     }
     /**
      * This calculates pages for the builder to work with.
@@ -70,6 +73,17 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
+     * Sets the current embeds page to the one provided.
+     * Do not use this unless the first page has initialized already.
+     *
+     * @param page The page to update the embed to.
+     * @emits pageUpdate
+     */
+    updatePage(page) {
+        this.emit('pageUpdate', page);
+        return this;
+    }
+    /**
      *
      * @param format The format that the footer will use to display page number (if enabled).
      * ```javascript
@@ -84,10 +98,11 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
-     *
+     * @deprecated Use constructor to set the channel instead. Will be removed on update 3.0.0
      * @param channel The channel the embed will be sent to.
      */
     setChannel(channel) {
+        process.emitWarning('setChannel is deprecated, please use the constructor to set the channel instead.', 'DeprecationWarning');
         this.channel = channel;
         return this;
     }
@@ -294,29 +309,36 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      * ```javascript
-    * builder.addEmojis([{
-    * '❗': (sent, page, emoji) => {
-    *   sent.delete();
-    *   builder.cancel();
-    *   sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
-    * },
-    * }]);
-    *```
+     * builder.addEmojis([{
+     *   emoji: '❗',
+     *   do(sent, page, emoji) => {
+     *       sent.delete();
+     *       builder.cancel();
+     *       sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
+     *   },
+     * }]);
+     * ```
      *
      * @param emojis The list of emojis to push.
      */
     addEmojis(emojis) {
         for (let i = 0; i < emojis.length; i++) {
-            const keys = Object.keys(emojis[i]);
-            const values = Object.values(emojis[i]);
-            this.addEmoji(keys[i], values[i]);
+            this.addEmoji(emojis[i].emoji, emojis[i].do);
         }
         return this;
+    }
+    _pageFooter(sent, page) {
+        if (this.usingPageNumber)
+            this.embedArray[page].setFooter(this.pageFormat
+                .replace('%p', (page + 1).toString())
+                .replace('%m', this.embedArray.length.toString()));
+        sent.edit(this.embedArray[page]);
     }
     /**
      * Builds the embed.
      * @emits stop
      * @emits create
+     * @listens pageUpdate
      */
     build() {
         if (!this.channel || !this.embedArray.length)
@@ -343,9 +365,10 @@ class EmbedBuilder extends events_1.EventEmitter {
                 yield sent.react(last);
                 yield sent.react(next);
             }
-            if (this.emojis.length !== 0) {
-                for (let i = 0; i < this.emojis.length; i++)
+            if (this.emojis.length) {
+                for (let i = 0; i < this.emojis.length; i++) {
                     yield sent.react(this.emojis[i].emoji);
+                }
             }
             this.emit('create', sent, sent.reactions);
             const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id, {
@@ -384,11 +407,20 @@ class EmbedBuilder extends events_1.EventEmitter {
                     if (reaction.emoji.name === this.emojis[i].emoji)
                         return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                 }
-                if (this.usingPageNumber)
-                    this.embedArray[page].setFooter(this.pageFormat
-                        .replace('%p', (page + 1).toString())
-                        .replace('%m', this.embedArray.length.toString()));
-                sent.edit(this.embedArray[page]);
+                this._pageFooter(sent, page);
+            });
+            this.on('pageUpdate', (newPage) => {
+                newPage = newPage - 1;
+                if (collection.ended)
+                    return;
+                else if (newPage > this.embedArray.length - 1)
+                    return;
+                else if (newPage === 0)
+                    return;
+                else {
+                    page = newPage;
+                    this._pageFooter(sent, page);
+                }
             });
             this.collection = collection;
         }));

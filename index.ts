@@ -16,16 +16,9 @@ import { EventEmitter } from "events";
  * @private
  * @ignore
  */
-interface Emojis {
+interface Emoji {
     emoji: string;
     do: (sent: Message, page: number, emoji: string) => void;
-}
-
-/**
- * @private
- */
-interface MultipleEmojis {
-    name: (sent: Message, page: number, emoji: string) => void;
 }
 
 /**
@@ -45,7 +38,7 @@ interface MultipleEmojis {
 class EmbedBuilder extends EventEmitter {
     private embedArray: MessageEmbed[] = [];
     private hasColor: boolean = false;
-    private emojis: Emojis[] = [];
+    private emojis: Emoji[] = [];
     private usingPages: boolean = true;
     private collection: ReactionCollector | undefined;
     private channel: TextChannel | DMChannel | undefined;
@@ -57,6 +50,13 @@ class EmbedBuilder extends EventEmitter {
     private last: string | undefined;
     private usingPageNumber: boolean = true;
     private pageFormat: string = '%p/%m';
+
+    constructor(channel?: TextChannel | DMChannel) {
+        super();
+        if (channel) {
+            this.channel = channel;
+        }
+    }
 
     /**
      * This calculates pages for the builder to work with.
@@ -96,6 +96,18 @@ class EmbedBuilder extends EventEmitter {
     }
 
     /**
+     * Sets the current embeds page to the one provided.
+     * Do not use this unless the first page has initialized already.
+     * 
+     * @param page The page to update the embed to.
+     * @emits pageUpdate
+     */
+    public updatePage(page: number) {
+        this.emit('pageUpdate', page);
+        return this;
+    }
+
+    /**
      *
      * @param format The format that the footer will use to display page number (if enabled).
      * ```javascript
@@ -111,10 +123,11 @@ class EmbedBuilder extends EventEmitter {
     }
 
     /**
-     * 
+     * @deprecated Use constructor to set the channel instead. Will be removed on update 3.0.0
      * @param channel The channel the embed will be sent to.
      */
     public setChannel(channel: TextChannel | DMChannel) {
+        process.emitWarning('setChannel is deprecated, please use the constructor to set the channel instead.', 'DeprecationWarning');
         this.channel = channel;
         return this;
     }
@@ -349,30 +362,40 @@ class EmbedBuilder extends EventEmitter {
 
     /**
      * ```javascript
-    * builder.addEmojis([{
-    * '❗': (sent, page, emoji) => {
-    *   sent.delete();
-    *   builder.cancel();
-    *   sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
-    * },
-    * }]);
-    *```
+     * builder.addEmojis([{
+     *   emoji: '❗',
+     *   do(sent, page, emoji) => {
+     *       sent.delete();
+     *       builder.cancel();
+     *       sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
+     *   },
+     * }]);
+     * ```
      * 
      * @param emojis The list of emojis to push.
      */
-    public addEmojis(emojis: MultipleEmojis[]) {
+    public addEmojis(emojis: Emoji[]) {
         for (let i = 0; i < emojis.length; i++) {
-            const keys = Object.keys(emojis[i]);
-            const values = Object.values(emojis[i]);
-            this.addEmoji(keys[i], values[i]);
+            this.addEmoji(emojis[i].emoji, emojis[i].do);
         }
         return this;
+    }
+
+    private _pageFooter(sent: Message, page: number) {
+        if (this.usingPageNumber)
+            this.embedArray[page].setFooter(
+                this.pageFormat
+                    .replace('%p', (page + 1).toString())
+                    .replace('%m', this.embedArray.length.toString())
+            );
+        sent.edit(this.embedArray[page]);
     }
 
     /**
      * Builds the embed.
      * @emits stop
      * @emits create
+     * @listens pageUpdate
      */
     public build() {
         if (!this.channel || !this.embedArray.length) throw new Error('A channel, an array of embeds, and time is required!');
@@ -399,9 +422,10 @@ class EmbedBuilder extends EventEmitter {
                 await sent.react(last);
                 await sent.react(next);
             }
-            if (this.emojis.length !== 0) {
-                for (let i = 0; i < this.emojis.length; i++)
+            if (this.emojis.length) {
+                for (let i = 0; i < this.emojis.length; i++) {
                     await sent.react(this.emojis[i].emoji);
+                }
             }
             this.emit('create', sent, sent.reactions);
             const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id, {
@@ -438,13 +462,21 @@ class EmbedBuilder extends EventEmitter {
                     if (reaction.emoji.name === this.emojis[i].emoji)
                         return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                 }
-                if (this.usingPageNumber)
-                    this.embedArray[page].setFooter(
-                        this.pageFormat
-                            .replace('%p', (page + 1).toString())
-                            .replace('%m', this.embedArray.length.toString())
-                    );
-                sent.edit(this.embedArray[page]);
+                this._pageFooter(sent, page);
+            });
+            this.on('pageUpdate', (newPage) => {
+                newPage = newPage - 1;
+                if (collection.ended)
+                    return;
+                else if (newPage > this.embedArray.length - 1)
+                    return;
+                else if (newPage === 0)
+                    return;
+                else {
+                    page = newPage;
+                    this._pageFooter(sent, page);
+                }
+
             });
             this.collection = collection;
         });
@@ -463,6 +495,11 @@ namespace EmbedBuilder {
      * @event create
      */
     declare function create(sent: Message, reactions: Collection<string, MessageReaction>): void;
+    /**
+     * Emitted when the page for the builder has updated.
+     * @event pageUpdate
+     */
+    declare function pageUpdate(page: number): void;
 }
 
 export = EmbedBuilder;
