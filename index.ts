@@ -385,7 +385,7 @@ class EmbedBuilder extends EventEmitter {
      * });
      * ```
      * 
-     * @param emojis The list of emojis to push.
+     * @param emojis The emojis to push.
      */
     public addEmojis(emojis: Emojis | Emoji[]) {
         if (emojis instanceof Array) {
@@ -399,19 +399,6 @@ class EmbedBuilder extends EventEmitter {
                 this.addEmoji(keys[i], values[i]);
         }
         return this;
-    }
-
-    /**
-     * @ignore
-     */
-    private _pageFooter(sent: Message, page: number) {
-        if (this.usingPageNumber)
-            this.embedArray[page].setFooter(
-                this.pageFormat
-                    .replace('%p', (page + 1).toString())
-                    .replace('%m', this.embedArray.length.toString())
-            );
-        sent.edit(this.embedArray[page]);
     }
 
     /**
@@ -431,11 +418,11 @@ class EmbedBuilder extends EventEmitter {
             this._setColor(0x2872DB);
         let page = 0;
         if (this.usingPageNumber)
-            this.embedArray[page].setFooter(
-                this.pageFormat
-                    .replace('%p', (page + 1).toString())
+            for (let i = 0; i < this.embedArray.length; i++)
+                this.embedArray[i].setFooter(this.pageFormat
+                    .replace('%p', (i + 1).toString())
                     .replace('%m', this.embedArray.length.toString())
-            );
+                );
         this.channel.send(this.embedArray[page]).then(async sent => {
             if (sent instanceof Array) throw new Error('Got multiple messages instead of one');
             let author: User;
@@ -490,7 +477,7 @@ class EmbedBuilder extends EventEmitter {
                     if (reaction.emoji.name === this.emojis[i].emoji)
                         return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                 }
-                this._pageFooter(sent, page);
+                sent.edit(this.embedArray[page]);
             });
             this.on('pageUpdate', (newPage) => {
                 newPage = newPage - 1;
@@ -498,11 +485,11 @@ class EmbedBuilder extends EventEmitter {
                     return;
                 else if (newPage > this.embedArray.length - 1)
                     return;
-                else if (newPage === 0)
+                else if (newPage < 0)
                     return;
                 else {
                     page = newPage;
-                    this._pageFooter(sent, page);
+                    sent.edit(this.embedArray[newPage]);
                 }
 
             });

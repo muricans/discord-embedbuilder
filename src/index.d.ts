@@ -179,13 +179,9 @@ declare class EmbedBuilder extends EventEmitter {
      * });
      * ```
      *
-     * @param emojis The list of emojis to push.
+     * @param emojis The emojis to push.
      */
     addEmojis(emojis: Emojis | Emoji[]): this;
-    /**
-     * @ignore
-     */
-    private _pageFooter;
     /**
      * Builds the embed.
      * @emits stop

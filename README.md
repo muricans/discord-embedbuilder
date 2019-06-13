@@ -63,16 +63,15 @@ builder.addEmoji('❗', (sent, page, emoji) => {
 });
 ```
 
-`addEmojis(emojiList)`
+`addEmojis(emojis)`
 
 Add multiple emojis to do different actions.
 
 ```javascript
 builder.addEmojis([{
-    emoji: '❗',
-    do(sent, page, emoji) => {
-        sent.delete();
+    '❗': (sent, page, emoji) => {
         builder.cancel();
+        sent.delete();
         sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
     },
 }]);
