@@ -37,6 +37,7 @@ declare class EmbedBuilder extends EventEmitter {
     private last;
     private usingPageNumber;
     private pageFormat;
+  
     constructor(channel?: TextChannel | DMChannel);
     /**
      * This calculates pages for the builder to work with.
