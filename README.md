@@ -13,7 +13,7 @@ For discord.js v12
 `npm install muricans/discord-embedbuilder#v12`
 
 ## Methods
-All methods that have the same names as the ones from [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
+All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/master/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
 
 `usePages(use)`
 
@@ -25,11 +25,11 @@ The channel that is set here will be the channel the pages are sent to.
 
 `setEmbeds(embeds)`
 
-The array of RichEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
+The array of MessageEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
 
 `addEmbed(embed)`
 
-Adds a RichEmbed to the array of embeds.
+Adds a MessageEmbed to the array of embeds.
 
 `concatEmbeds(embeds)`
 
@@ -133,9 +133,9 @@ client.on('message', message => {
         .setChannel(message.channel)
         .setTime(60000); // Time is in milliseconds
     const myEmbedArray = [
-        new Discord.RichEmbed().addField('1st', 'page'),
-        new Discord.RichEmbed().addField('2nd', 'page'), 
-        new Discord.RichEmbed().addField('3rd', 'page'),
+        new Discord.MessageEmbed().addField('1st', 'page'),
+        new Discord.MessageEmbed().addField('2nd', 'page'), 
+        new Discord.MessageEmbed().addField('3rd', 'page'),
     ];
     builder
         .setEmbeds(myEmbedArray)
@@ -176,7 +176,7 @@ function leaderboard(channel, client) {
             if (i === 50)
                 break;
             if (!embeds.getEmbeds()[m - 1] && users[i]) {
-                embeds.addEmbed(new Discord.RichEmbed());
+                embeds.addEmbed(new Discord.MessageEmbed());
                 pages++;
             }
             if (i === (10 * m) - 1)
