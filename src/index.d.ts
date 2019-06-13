@@ -7,10 +7,10 @@ interface MultipleEmojis {
     name: (sent: Message, page: number, emoji: string) => void;
 }
 /**
- * Builds an embed with a number of pages based on how many are in the RichEmbed array given.
+ * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
  * ```javascript
- * const myEmbeds = [new Discord.RichEmbed().addField('This is', 'a field!'),
- *  new Discord.RichEmbed().addField('This is', 'another field!')];
+ * const myEmbeds = [new Discord.MessageEmbed().addField('This is', 'a field!'),
+ *  new Discord.MessageEmbed().addField('This is', 'another field!')];
  * embedBuilder
  *  .setChannel(message.channel)
  *  .setTime(30000)
@@ -93,7 +93,7 @@ declare class EmbedBuilder extends EventEmitter {
      */
     addEmbed(embed: MessageEmbed): this;
     /**
-     * @returns {RichEmbed[]} The current embeds that this builder has.
+     * @returns {MessageEmbed[]} The current embeds that this builder has.
      */
     getEmbeds(): MessageEmbed[];
     setTitle(title: string): this;

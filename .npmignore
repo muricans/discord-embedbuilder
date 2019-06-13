@@ -6,3 +6,5 @@ test
 docs
 index.ts
 typedoc.js
+.gitignore
+src

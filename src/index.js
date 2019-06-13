@@ -10,10 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const discord_js_1 = require("discord.js");
 const events_1 = require("events");
 /**
- * Builds an embed with a number of pages based on how many are in the RichEmbed array given.
+ * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
  * ```javascript
- * const myEmbeds = [new Discord.RichEmbed().addField('This is', 'a field!'),
- *  new Discord.RichEmbed().addField('This is', 'another field!')];
+ * const myEmbeds = [new Discord.MessageEmbed().addField('This is', 'a field!'),
+ *  new Discord.MessageEmbed().addField('This is', 'another field!')];
  * embedBuilder
  *  .setChannel(message.channel)
  *  .setTime(30000)
@@ -125,7 +125,7 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
-     * @returns {RichEmbed[]} The current embeds that this builder has.
+     * @returns {MessageEmbed[]} The current embeds that this builder has.
      */
     getEmbeds() {
         return this.embedArray;
