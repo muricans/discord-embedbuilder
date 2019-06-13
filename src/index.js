@@ -10,10 +10,10 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 const discord_js_1 = require("discord.js");
 const events_1 = require("events");
 /**
- * Builds an embed with a number of pages based on how many are in the RichEmbed array given.
+ * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
  * ```javascript
- * const myEmbeds = [new Discord.RichEmbed().addField('This is', 'a field!'),
- *  new Discord.RichEmbed().addField('This is', 'another field!')];
+ * const myEmbeds = [new Discord.MessageEmbed().addField('This is', 'a field!'),
+ *  new Discord.MessageEmbed().addField('This is', 'another field!')];
  * embedBuilder
  *  .setChannel(message.channel)
  *  .setTime(30000)
@@ -33,30 +33,31 @@ class EmbedBuilder extends events_1.EventEmitter {
         this.time = 60000;
         this.usingPageNumber = true;
         this.pageFormat = '%p/%m';
-        if (channel)
+        if (channel) {
             this.channel = channel;
+        }
     }
     /**
-    * This calculates pages for the builder to work with.
-    * ```javascript
-    * // This will generate a builder with a data length set to an array
-    * // It will have 10 fields per page, which will all be inline, containing username and points data.
-    * embedBuilder.calculatePages(users.length, 10, (embed, i) => {
-    *  embed.addField(users[i].username, users[i].points, true);
-    * });
-    * ```
-    *
-    * @param data This is amount of data to process.
-    * @param dataPerPage This is how much data you want displayed per page.
-    * @param insert Gives you an embed and the current index.
-    */
+     * This calculates pages for the builder to work with.
+     * ```javascript
+     * // This will generate a builder with a data length set to an array
+     * // It will have 10 fields per page, which will all be inline, containing username and points data.
+     * embedBuilder.calculatePages(users.length, 10, (embed, i) => {
+     *  embed.addField(users[i].username, users[i].points, true);
+     * });
+     * ```
+     *
+     * @param data This is amount of data to process.
+     * @param dataPerPage This is how much data you want displayed per page.
+     * @param insert Gives you an embed and the current index.
+     */
     calculatePages(data, dataPerPage, insert) {
         let multiplier = 1;
         for (let i = 0; i < dataPerPage * multiplier; i++) {
             if (i === data)
                 break;
             if (!this.embedArray[multiplier - 1])
-                this.embedArray.push(new discord_js_1.RichEmbed());
+                this.embedArray.push(new discord_js_1.MessageEmbed());
             insert(this.embedArray[multiplier - 1], i);
             if (i === (dataPerPage * multiplier) - 1)
                 multiplier++;
@@ -69,6 +70,17 @@ class EmbedBuilder extends events_1.EventEmitter {
      */
     usePages(use) {
         this.usingPages = use;
+        return this;
+    }
+    /**
+     * Sets the current embeds page to the one provided.
+     * Do not use this unless the first page has initialized already.
+     *
+     * @param page The page to update the embed to.
+     * @emits pageUpdate
+     */
+    updatePage(page) {
+        this.emit('pageUpdate', page);
         return this;
     }
     /**
@@ -86,10 +98,11 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
-     *
+     * @deprecated Use constructor to set the channel instead. Will be removed on update 3.0.0
      * @param channel The channel the embed will be sent to.
      */
     setChannel(channel) {
+        process.emitWarning('setChannel is deprecated, please use the constructor to set the channel instead.', 'DeprecationWarning');
         this.channel = channel;
         return this;
     }
@@ -127,7 +140,7 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
-     * @returns {RichEmbed[]} The current embeds that this builder has.
+     * @returns {MessageEmbed[]} The current embeds that this builder has.
      */
     getEmbeds() {
         return this.embedArray;
@@ -168,9 +181,9 @@ class EmbedBuilder extends events_1.EventEmitter {
         });
         return this;
     }
-    attachFile(file) {
+    spliceField(index, deleteCount, name, value, inline) {
         this._all(i => {
-            this.embedArray[i].attachFile(file);
+            this.embedArray[i].spliceField(index, deleteCount, name, value, inline);
         });
         return this;
     }
@@ -294,15 +307,38 @@ class EmbedBuilder extends events_1.EventEmitter {
         this.usingPageNumber = use;
         return this;
     }
+    /**
+     * ```javascript
+     * builder.addEmojis([{
+     *   emoji: '❗',
+     *   do(sent, page, emoji) => {
+     *       sent.delete();
+     *       builder.cancel();
+     *       sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
+     *   },
+     * }]);
+     * ```
+     *
+     * @param emojis The list of emojis to push.
+     */
     addEmojis(emojis) {
-        for (let i = 0; i < emojis.length; i++)
+        for (let i = 0; i < emojis.length; i++) {
             this.addEmoji(emojis[i].emoji, emojis[i].do);
+        }
         return this;
+    }
+    _pageFooter(sent, page) {
+        if (this.usingPageNumber)
+            this.embedArray[page].setFooter(this.pageFormat
+                .replace('%p', (page + 1).toString())
+                .replace('%m', this.embedArray.length.toString()));
+        sent.edit(this.embedArray[page]);
     }
     /**
      * Builds the embed.
      * @emits stop
      * @emits create
+     * @listens pageUpdate
      */
     build() {
         if (!this.channel || !this.embedArray.length)
@@ -329,19 +365,21 @@ class EmbedBuilder extends events_1.EventEmitter {
                 yield sent.react(last);
                 yield sent.react(next);
             }
-            if (this.emojis.length !== 0) {
-                for (let i = 0; i < this.emojis.length; i++)
+            if (this.emojis.length) {
+                for (let i = 0; i < this.emojis.length; i++) {
                     yield sent.react(this.emojis[i].emoji);
+                }
             }
             this.emit('create', sent, sent.reactions);
-            const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id && reaction.remove(user), {
+            const collection = sent.createReactionCollector((reaction, user) => user.id !== sent.author.id, {
                 time: this.time,
             }).on('end', () => {
                 if (!this.hasColor)
                     sent.edit(this.embedArray[page].setColor(0xE21717));
                 this.emit('stop', sent, page, collection);
             });
-            collection.on('collect', reaction => {
+            collection.on('collect', (reaction, user) => {
+                reaction.users.remove(user);
                 if (this.usingPages && this.embedArray.length > 1) {
                     switch (reaction.emoji.name) {
                         case first:
@@ -369,11 +407,20 @@ class EmbedBuilder extends events_1.EventEmitter {
                     if (reaction.emoji.name === this.emojis[i].emoji)
                         return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                 }
-                if (this.usingPageNumber)
-                    this.embedArray[page].setFooter(this.pageFormat
-                        .replace('%p', (page + 1).toString())
-                        .replace('%m', this.embedArray.length.toString()));
-                sent.edit(this.embedArray[page]);
+                this._pageFooter(sent, page);
+            });
+            this.on('pageUpdate', (newPage) => {
+                newPage = newPage - 1;
+                if (collection.ended)
+                    return;
+                else if (newPage > this.embedArray.length - 1)
+                    return;
+                else if (newPage === 0)
+                    return;
+                else {
+                    page = newPage;
+                    this._pageFooter(sent, page);
+                }
             });
             this.collection = collection;
         }));

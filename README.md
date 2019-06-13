@@ -15,7 +15,9 @@ discord.js v12
 `npm install discord-embedbuilder`
 
 ## Methods
-All methods that have the same names as the ones from [RichEmbed](https://discord.js.org/#/docs/main/stable/class/RichEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
+Some methods here are different than those for discord.js v11.
+
+All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/master/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
 
 `usePages(use)`
 
@@ -27,11 +29,11 @@ The channel that is set here will be the channel the pages are sent to.
 
 `setEmbeds(embeds)`
 
-The array of RichEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
+The array of MessageEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
 
 `addEmbed(embed)`
 
-Adds a RichEmbed to the array of embeds.
+Adds a MessageEmbed to the array of embeds.
 
 `concatEmbeds(embeds)`
 
@@ -61,20 +63,20 @@ builder.addEmoji('❗', (sent, page, emoji) => {
 });
 ```
 
-`addEmoji(emojiList)`
+`addEmojis(emojiList)`
 
 Add multiple emojis to do different actions.
 
 ```javascript
 builder.addEmojis([{
-    '❗': (sent, page, emoji) => {
+    emoji: '❗',
+    do(sent, page, emoji) => {
         sent.delete();
         builder.cancel();
         sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
     },
 }]);
 ```
-
 
 `deleteEmoji(emoji)`
 
@@ -96,6 +98,24 @@ If showing page numbers, this is the format that will be used.
 
 By default format is %p/%m which converts to current/max.
 
+`calculatePages(data, dataPerPage, insert)`
+
+This calculates pages for the builder to work with.
+
+```javascript
+/*
+This will generate a builder with a data length set to an array.
+It will have 10 fields per page, which will all be inline, containing username and points data.
+*/
+embedBuilder.calculatePages(users.length, 10, (embed, i) => {
+    embed.addField(users[i].username, users[i].points, true);
+});
+```
+
+`updatePage(page)`
+
+Updates the current page to the one set there. This checks if the page is valid itself. Make sure the first page of the builder has already gone through before using this.
+
 ## Events
 [`create`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#create)
 
@@ -104,6 +124,10 @@ Emitted from build() when the first page has finished building.
 [`stop`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#delete)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
+
+['pageUpdate'](https://muricans.github.io/embedbuilder/v12/classes/embedbuilder.html#pageUpdate)
+
+Emitted from updatePage(). Sets the new page for the bot.
 
 ## Example
 First import discord-embedbuilder into your project.
@@ -122,9 +146,9 @@ client.on('message', message => {
         .setChannel(message.channel)
         .setTime(60000); // Time is in milliseconds
     const myEmbedArray = [
-        new Discord.RichEmbed().addField('1st', 'page'),
-        new Discord.RichEmbed().addField('2nd', 'page'),
-        new Discord.RichEmbed().addField('3rd', 'page'),
+        new Discord.MessageEmbed().addField('1st', 'page'),
+        new Discord.MessageEmbed().addField('2nd', 'page'), 
+        new Discord.MessageEmbed().addField('3rd', 'page'),
     ];
     builder
         .setEmbeds(myEmbedArray)
@@ -165,7 +189,7 @@ function leaderboard(channel, client) {
             if (i === 50)
                 break;
             if (!embeds.getEmbeds()[m - 1] && users[i]) {
-                embeds.addEmbed(new Discord.RichEmbed());
+                embeds.addEmbed(new Discord.MessageEmbed());
                 pages++;
             }
             if (i === (10 * m) - 1)

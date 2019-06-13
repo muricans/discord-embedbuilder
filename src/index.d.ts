@@ -1,14 +1,18 @@
-import { TextChannel, RichEmbed, Message, ColorResolvable, Attachment, FileOptions, DMChannel, GroupDMChannel } from "discord.js";
+import { TextChannel, MessageEmbed, Message, ColorResolvable, FileOptions, DMChannel, MessageAttachment } from "discord.js";
 import { EventEmitter } from "events";
-interface Emojis {
+/**
+ * @private
+ * @ignore
+ */
+interface Emoji {
     emoji: string;
     do: (sent: Message, page: number, emoji: string) => void;
 }
 /**
- * Builds an embed with a number of pages based on how many are in the RichEmbed array given.
+ * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
  * ```javascript
- * const myEmbeds = [new Discord.RichEmbed().addField('This is', 'a field!'),
- *  new Discord.RichEmbed().addField('This is', 'another field!')];
+ * const myEmbeds = [new Discord.MessageEmbed().addField('This is', 'a field!'),
+ *  new Discord.MessageEmbed().addField('This is', 'another field!')];
  * embedBuilder
  *  .setChannel(message.channel)
  *  .setTime(30000)
@@ -33,27 +37,36 @@ declare class EmbedBuilder extends EventEmitter {
     private last;
     private usingPageNumber;
     private pageFormat;
-    constructor(channel?: TextChannel | DMChannel | GroupDMChannel);
+  
+    constructor(channel?: TextChannel | DMChannel);
     /**
-    * This calculates pages for the builder to work with.
-    * ```javascript
-    * // This will generate a builder with a data length set to an array
-    * // It will have 10 fields per page, which will all be inline, containing username and points data.
-    * embedBuilder.calculatePages(users.length, 10, (embed, i) => {
-    *  embed.addField(users[i].username, users[i].points, true);
-    * });
-    * ```
-    *
-    * @param data This is amount of data to process.
-    * @param dataPerPage This is how much data you want displayed per page.
-    * @param insert Gives you an embed and the current index.
-    */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: RichEmbed, index: number) => void): this;
+     * This calculates pages for the builder to work with.
+     * ```javascript
+     * // This will generate a builder with a data length set to an array
+     * // It will have 10 fields per page, which will all be inline, containing username and points data.
+     * embedBuilder.calculatePages(users.length, 10, (embed, i) => {
+     *  embed.addField(users[i].username, users[i].points, true);
+     * });
+     * ```
+     *
+     * @param data This is amount of data to process.
+     * @param dataPerPage This is how much data you want displayed per page.
+     * @param insert Gives you an embed and the current index.
+     */
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this;
     /**
      *
      * @param use Use the page system for the embed.
      */
     usePages(use: boolean): this;
+    /**
+     * Sets the current embeds page to the one provided.
+     * Do not use this unless the first page has initialized already.
+     *
+     * @param page The page to update the embed to.
+     * @emits pageUpdate
+     */
+    updatePage(page: number): this;
     /**
      *
      * @param format The format that the footer will use to display page number (if enabled).
@@ -66,21 +79,21 @@ declare class EmbedBuilder extends EventEmitter {
      */
     setPageFormat(format: string): this;
     /**
-     *
+     * @deprecated Use constructor to set the channel instead. Will be removed on update 3.0.0
      * @param channel The channel the embed will be sent to.
      */
-    setChannel(channel: TextChannel | DMChannel | GroupDMChannel): this;
+    setChannel(channel: TextChannel | DMChannel): this;
     /**
      * Adds the embeds given to the end of the current embeds array.
      *
      * @param embedArray The embeds given here will be put at the end of the current embed array.
      */
-    concatEmbeds(embedArray: RichEmbed[]): this;
+    concatEmbeds(embedArray: MessageEmbed[]): this;
     /**
      *
      * @param embedArray The array of embeds to use.
      */
-    setEmbeds(embedArray: RichEmbed[]): this;
+    setEmbeds(embedArray: MessageEmbed[]): this;
     /**
      *
      * @param time The amount of time the bot will allow reactions for.
@@ -90,19 +103,19 @@ declare class EmbedBuilder extends EventEmitter {
      *
      * @param embed The embed to push to the array of embeds.
      */
-    addEmbed(embed: RichEmbed): this;
+    addEmbed(embed: MessageEmbed): this;
     /**
-     * @returns {RichEmbed[]} The current embeds that this builder has.
+     * @returns {MessageEmbed[]} The current embeds that this builder has.
      */
-    getEmbeds(): RichEmbed[];
+    getEmbeds(): MessageEmbed[];
     setTitle(title: string): this;
     setFooter(text: any, icon?: string): this;
     setDescription(description: any): this;
     setImage(url: string): this;
     setThumbnail(url: string): this;
     addBlankField(inline?: boolean): this;
-    attachFile(file: string | Attachment | FileOptions): this;
-    attachFiles(files: string[] | Attachment[] | FileOptions[]): this;
+    spliceField(index: number, deleteCount: number, name?: any, value?: any, inline?: boolean): this;
+    attachFiles(files: string[] | MessageAttachment[] | FileOptions[]): this;
     addField(name: any, value: any, inline?: boolean): this;
     setURL(url: string): this;
     setAuthor(name: any, icon?: string, url?: string): this;
@@ -144,11 +157,27 @@ declare class EmbedBuilder extends EventEmitter {
      */
     cancel(callback?: () => void): this;
     showPageNumber(use: boolean): this;
-    addEmojis(emojis: Emojis[]): this;
+    /**
+     * ```javascript
+     * builder.addEmojis([{
+     *   emoji: '❗',
+     *   do(sent, page, emoji) => {
+     *       sent.delete();
+     *       builder.cancel();
+     *       sent.channel.send(`A new message${emoji}\nThe page you were on before was ${page}`);
+     *   },
+     * }]);
+     * ```
+     *
+     * @param emojis The list of emojis to push.
+     */
+    addEmojis(emojis: Emoji[]): this;
+    private _pageFooter;
     /**
      * Builds the embed.
      * @emits stop
      * @emits create
+     * @listens pageUpdate
      */
     build(): this;
 }
