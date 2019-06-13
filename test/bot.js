@@ -60,4 +60,4 @@ client.on('message', message => {
         });
 });
 
-client.login('NTc5MDE3NDA5NTI1MTg2NTY2.XOHIEw.pMIqgCc4yPKFE7JshqemZGPvcWk');
+client.login('pepelaugh');
