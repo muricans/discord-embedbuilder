@@ -1,5 +1,6 @@
-import { TextChannel, MessageEmbed, Message, ColorResolvable, FileOptions, DMChannel, MessageAttachment } from "discord.js";
+import { TextChannel, MessageEmbed, Message, ColorResolvable, FileOptions, DMChannel, MessageAttachment, User } from "discord.js";
 import { EventEmitter } from "events";
+import { PageUpdateOptions } from './reaction/pageupdater';
 /**
  * @private
  */
@@ -14,20 +15,9 @@ interface Emojis {
     emoji: (sent: Message, page: number, emoji: string) => void;
 }
 /**
- * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
- * ```javascript
- * const myEmbeds = [new Discord.MessageEmbed().addField('This is', 'a field!'),
- *  new Discord.MessageEmbed().addField('This is', 'another field!')];
- * embedBuilder
- *  .setChannel(message.channel)
- *  .setTime(30000)
- *  .setEmbeds(myEmbeds)
- *  .build();
- * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
- * ```
  * @noInheritDoc
  */
-declare class EmbedBuilder extends EventEmitter {
+export declare class EmbedBuilder extends EventEmitter {
     private embedArray;
     private hasColor;
     private emojis;
@@ -42,6 +32,19 @@ declare class EmbedBuilder extends EventEmitter {
     private last;
     private usingPageNumber;
     private pageFormat;
+    /**
+    * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
+    * ```javascript
+    * const myEmbeds = [new Discord.MessageEmbed().addField('This is', 'a field!'),
+    *  new Discord.MessageEmbed().addField('This is', 'another field!')];
+    * embedBuilder
+    *  .setChannel(message.channel)
+    *  .setTime(30000)
+    *  .setEmbeds(myEmbeds)
+    *  .build();
+    * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
+    * ```
+    */
     constructor(channel?: TextChannel | DMChannel);
     /**
      * This calculates pages for the builder to work with.
@@ -193,6 +196,7 @@ declare class EmbedBuilder extends EventEmitter {
      * @param newEmoji This emoji will replace the current page emoji for the given type.
      */
     setPageEmoji(emoji: string, newEmoji: string): this;
+    awaitPageUpdate(user: User, options?: PageUpdateOptions): this | undefined;
     /**
      * Builds the embed.
      * @emits stop
@@ -201,6 +205,6 @@ declare class EmbedBuilder extends EventEmitter {
      */
     build(): this;
 }
-declare namespace EmbedBuilder {
+export declare namespace EmbedBuilder {
 }
-export = EmbedBuilder;
+export {};
