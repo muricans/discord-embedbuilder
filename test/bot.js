@@ -13,11 +13,16 @@ const {
 client.on('message', message => {
   if (message.author.bot || !message.content.startsWith('test')) return;
   new EmbedBuilder(message.channel)
-    .calculatePages(10, 2, (embed, i) => {
-      embed.addField(i + 1, Math.floor(Math.random() * i));
-    })
+    .on('create', () => console.log('created'))
     .setTitle('Embed Examples')
-    .build();
+    .calculatePages(10, 2, (embed, i) => {
+      embed.addField(`${i}`, 'page');
+    }).then(builder => {
+      builder.build()
+        .then(builder => {
+          console.log('yes');
+        });
+    });
 });
 
 client.login(token);

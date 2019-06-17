@@ -30,15 +30,20 @@ interface Emojis {
 }
 
 /**
+ * EmbedBuilder class
  * @noInheritDoc
  */
 export class EmbedBuilder extends EventEmitter {
-    private embedArray: MessageEmbed[] = [];
+    /**
+     * The channel being used with the EmbedBuilder.
+     */
+    public channel: TextChannel | DMChannel;
+    public embeds: MessageEmbed[] = [];
+
     private hasColor: boolean = false;
     private emojis: Emoji[] = [];
     private usingPages: boolean = true;
     private collection: ReactionCollector | undefined;
-    private channel: TextChannel | DMChannel | undefined;
     private time: number = 60000;
     private back: string | undefined;
     private next: string | undefined;
@@ -61,11 +66,9 @@ export class EmbedBuilder extends EventEmitter {
     * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
     * ```
     */
-    constructor(channel?: TextChannel | DMChannel) {
+    constructor(channel: TextChannel | DMChannel) {
         super();
-        if (channel) {
-            this.channel = channel;
-        }
+        this.channel = channel;
     }
 
     /**
@@ -82,18 +85,21 @@ export class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void) {
-        let multiplier = 1;
-        for (let i = 0; i < dataPerPage * multiplier; i++) {
-            if (i === data)
-                break;
-            if (!this.embedArray[multiplier - 1])
-                this.embedArray.push(new MessageEmbed());
-            insert(this.embedArray[multiplier - 1], i);
-            if (i === (dataPerPage * multiplier) - 1)
-                multiplier++;
-        }
-        return this;
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): Promise<this> {
+        return new Promise((resolve, reject) => {
+            let multiplier = 1;
+            for (let i = 0; i < dataPerPage * multiplier; i++) {
+                if (i === data) {
+                    resolve(this);
+                    break;
+                }
+                if (!this.embeds[multiplier - 1])
+                    this.embeds.push(new MessageEmbed());
+                insert(this.embeds[multiplier - 1], i);
+                if (i === (dataPerPage * multiplier) - 1)
+                    multiplier++;
+            }
+        });
     }
 
     /**
@@ -145,19 +151,19 @@ export class EmbedBuilder extends EventEmitter {
     /**
      * Adds the embeds given to the end of the current embeds array.
      * 
-     * @param embedArray The embeds given here will be put at the end of the current embed array.
+     * @param embeds The embeds given here will be put at the end of the current embed array.
      */
-    public concatEmbeds(embedArray: MessageEmbed[]) {
-        this.embedArray.concat(embedArray);
+    public concatEmbeds(embeds: MessageEmbed[]) {
+        this.embeds.concat(embeds);
         return this;
     }
 
     /**
      * 
-     * @param embedArray The array of embeds to use.
+     * @param embeds The array of embeds to use.
      */
-    public setEmbeds(embedArray: MessageEmbed[]) {
-        this.embedArray = embedArray;
+    public setEmbeds(embeds: MessageEmbed[]) {
+        this.embeds = embeds;
         return this;
     }
 
@@ -175,97 +181,99 @@ export class EmbedBuilder extends EventEmitter {
      * @param embed The embed to push to the array of embeds.
      */
     public addEmbed(embed: MessageEmbed) {
-        this.embedArray.push(embed);
+        this.embeds.push(embed);
         return this;
     }
 
     /**
      * @returns {MessageEmbed[]} The current embeds that this builder has.
+     * @deprecated Use [[EmbedBuilder.embeds]] instead.
      */
     public getEmbeds() {
-        return this.embedArray;
+        process.emitWarning('#getEmbeds() is deprecated. Use #embeds instead.', 'DeprecationWarning');
+        return this.embeds;
     }
 
     public setTitle(title: string) {
         this._all((i) => {
-            this.embedArray[i].setTitle(title);
+            this.embeds[i].setTitle(title);
         });
         return this;
     }
 
     public setFooter(text: any, icon?: string) {
         this._all((i) => {
-            this.embedArray[i].setFooter(text, icon);
+            this.embeds[i].setFooter(text, icon);
         });
         return this;
     }
 
     public setDescription(description: any) {
         this._all(i => {
-            this.embedArray[i].setDescription(description);
+            this.embeds[i].setDescription(description);
         });
         return this;
     }
 
     public setImage(url: string) {
         this._all(i => {
-            this.embedArray[i].setImage(url);
+            this.embeds[i].setImage(url);
         });
         return this;
     }
 
     public setThumbnail(url: string) {
         this._all(i => {
-            this.embedArray[i].setThumbnail(url);
+            this.embeds[i].setThumbnail(url);
         });
         return this;
     }
 
     public addBlankField(inline?: boolean) {
         this._all(i => {
-            this.embedArray[i].addBlankField(inline);
+            this.embeds[i].addBlankField(inline);
         });
         return this;
     }
 
     public spliceField(index: number, deleteCount: number, name?: any, value?: any, inline?: boolean) {
         this._all(i => {
-            this.embedArray[i].spliceField(index, deleteCount, name, value, inline);
+            this.embeds[i].spliceField(index, deleteCount, name, value, inline);
         });
         return this;
     }
 
     public attachFiles(file: (string | MessageAttachment | FileOptions)[]) {
         this._all(i => {
-            this.embedArray[i].attachFiles(file);
+            this.embeds[i].attachFiles(file);
         });
         return this;
     }
 
     public addField(name: any, value: any, inline?: boolean) {
         this._all((i) => {
-            this.embedArray[i].addField(name, value, inline);
+            this.embeds[i].addField(name, value, inline);
         });
         return this;
     }
 
     public setURL(url: string) {
         this._all((i) => {
-            this.embedArray[i].setURL(url);
+            this.embeds[i].setURL(url);
         });
         return this;
     }
 
     public setAuthor(name: any, icon?: string, url?: string) {
         this._all((i) => {
-            this.embedArray[i].setAuthor(name, icon, url);
+            this.embeds[i].setAuthor(name, icon, url);
         });
         return this;
     }
 
     public setTimestamp(timestamp?: Date | number) {
         this._all((i) => {
-            this.embedArray[i].setTimestamp(timestamp);
+            this.embeds[i].setTimestamp(timestamp);
         });
         return this;
     }
@@ -274,7 +282,7 @@ export class EmbedBuilder extends EventEmitter {
      * @ignore
      */
     private _all(index: (i: number) => void) {
-        for (let i = 0; i < this.embedArray.length; i++)
+        for (let i = 0; i < this.embeds.length; i++)
             index(i);
     }
 
@@ -301,7 +309,7 @@ export class EmbedBuilder extends EventEmitter {
 
     public setColor(color: ColorResolvable) {
         this._all((i) => {
-            this.embedArray[i].setColor(color);
+            this.embeds[i].setColor(color);
         });
         this.hasColor = true;
         return this;
@@ -312,7 +320,7 @@ export class EmbedBuilder extends EventEmitter {
      */
     private _setColor(color: ColorResolvable) {
         this._all((i) => {
-            this.embedArray[i].setColor(color);
+            this.embeds[i].setColor(color);
         });
         return this;
     }
@@ -391,10 +399,11 @@ export class EmbedBuilder extends EventEmitter {
      * then set the builders current page to the page given.
      * 
      * @param user The user to accept a page update from.
+     * @emits pageUpdate
      */
     awaitPageUpdate(user: User, options?: PageUpdateOptions) {
         if (!this.channel) return;
-        const update = new PageUpdater(this.channel, user, this.embedArray, options).awaitPageUpdate();
+        const update = new PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
         update.on('page', (page, c) => {
             this.emit('pageUpdate', page);
             c.stop();
@@ -411,95 +420,97 @@ export class EmbedBuilder extends EventEmitter {
      * @emits create
      * @listens pageUpdate
      */
-    public build() {
-        if (!this.channel || !this.embedArray.length) throw new Error('A channel, an array of embeds, and time is required!');
-        const back = this.back ? this.back : '◀';
-        const first = this.first ? this.first : '⏪';
-        const stop = this.stop ? this.stop : '⏹';
-        const last = this.last ? this.last : '⏩';
-        const next = this.next ? this.next : '▶';
-        if (!this.hasColor)
-            this._setColor(0x2872DB);
-        let page = 0;
-        if (this.usingPageNumber)
-            for (let i = 0; i < this.embedArray.length; i++)
-                this.embedArray[i].setFooter(this.pageFormat
-                    .replace('%p', (i + 1).toString())
-                    .replace('%m', this.embedArray.length.toString())
-                );
-        this.channel.send(this.embedArray[page]).then(async sent => {
-            if (sent instanceof Array) throw new Error('Got multiple messages instead of one');
-            let author: User;
-            if (sent.author)
-                author = sent.author;
-            else
-                throw new Error('Author was not a user!');
-            if (this.usingPages && this.embedArray.length > 1) {
-                await sent.react(back);
-                await sent.react(first);
-                await sent.react(stop);
-                await sent.react(last);
-                await sent.react(next);
-            }
-            if (this.emojis.length) {
-                for (let i = 0; i < this.emojis.length; i++) {
-                    await sent.react(this.emojis[i].emoji);
+    public build(): Promise<this> {
+        return new Promise((resolve, reject) => {
+            if (!this.channel || !this.embeds.length) return reject(new Error('A channel, and array of embeds is required.'));
+            const back = this.back ? this.back : '◀';
+            const first = this.first ? this.first : '⏪';
+            const stop = this.stop ? this.stop : '⏹';
+            const last = this.last ? this.last : '⏩';
+            const next = this.next ? this.next : '▶';
+            if (!this.hasColor)
+                this._setColor(0x2872DB);
+            let page = 0;
+            if (this.usingPageNumber)
+                for (let i = 0; i < this.embeds.length; i++)
+                    this.embeds[i].setFooter(this.pageFormat
+                        .replace('%p', (i + 1).toString())
+                        .replace('%m', this.embeds.length.toString())
+                    );
+            this.channel.send(this.embeds[page]).then(async sent => {
+                if (sent instanceof Array) return reject(new Error('Got multiple messages instead of one.'));
+                let author: User;
+                if (sent.author)
+                    author = sent.author;
+                else
+                    throw new Error('Author was not a user!');
+                if (this.usingPages && this.embeds.length > 1) {
+                    await sent.react(back);
+                    await sent.react(first);
+                    await sent.react(stop);
+                    await sent.react(last);
+                    await sent.react(next);
                 }
-            }
-            this.emit('create', sent, sent.reactions);
-            const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
-                time: this.time,
-            }).on('end', () => {
-                if (!this.hasColor)
-                    sent.edit(this.embedArray[page].setColor(0xE21717));
-                this.emit('stop', sent, page, collection);
-            });
-            collection.on('collect', (reaction, user) => {
-                reaction.users.remove(user);
-                if (this.usingPages && this.embedArray.length > 1) {
-                    switch (reaction.emoji.name) {
-                        case first:
-                            page = 0;
-                            break;
-                        case back:
-                            if (page === 0) return;
-                            page--;
-                            break;
-                        case stop:
-                            collection.stop();
-                            break;
-                        case next:
-                            if (page === this.embedArray.length - 1) return;
-                            page++;
-                            break;
-                        case last:
-                            page = this.embedArray.length - 1;
-                            break;
+                if (this.emojis.length) {
+                    for (let i = 0; i < this.emojis.length; i++) {
+                        await sent.react(this.emojis[i].emoji);
                     }
                 }
-                for (let i = 0; i < this.emojis.length; i++) {
-                    if (reaction.emoji.name === this.emojis[i].emoji)
-                        return this.emojis[i].do(sent, page, this.emojis[i].emoji);
-                }
-                sent.edit(this.embedArray[page]);
-            });
-            this.on('pageUpdate', (newPage) => {
-                newPage = newPage - 1;
-                if (collection.ended)
-                    return;
-                else if (newPage > this.embedArray.length - 1)
-                    return;
-                else if (newPage < 0)
-                    return;
-                else {
-                    page = newPage;
-                    sent.edit(this.embedArray[newPage]);
-                }
+                this.emit('create', sent, sent.reactions);
+                const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
+                    time: this.time,
+                }).on('end', () => {
+                    if (!this.hasColor)
+                        sent.edit(this.embeds[page].setColor(0xE21717));
+                    this.emit('stop', sent, page, collection);
+                });
+                collection.on('collect', (reaction, user) => {
+                    reaction.users.remove(user);
+                    if (this.usingPages && this.embeds.length > 1) {
+                        switch (reaction.emoji.name) {
+                            case first:
+                                page = 0;
+                                break;
+                            case back:
+                                if (page === 0) return;
+                                page--;
+                                break;
+                            case stop:
+                                collection.stop();
+                                break;
+                            case next:
+                                if (page === this.embeds.length - 1) return;
+                                page++;
+                                break;
+                            case last:
+                                page = this.embeds.length - 1;
+                                break;
+                        }
+                    }
+                    for (let i = 0; i < this.emojis.length; i++) {
+                        if (reaction.emoji.name === this.emojis[i].emoji)
+                            return this.emojis[i].do(sent, page, this.emojis[i].emoji);
+                    }
+                    sent.edit(this.embeds[page]);
+                });
+                this.on('pageUpdate', (newPage) => {
+                    newPage = newPage - 1;
+                    if (collection.ended)
+                        return;
+                    else if (newPage > this.embeds.length - 1)
+                        return;
+                    else if (newPage < 0)
+                        return;
+                    else {
+                        page = newPage;
+                        sent.edit(this.embeds[newPage]);
+                    }
 
+                });
+                this.collection = collection;
+                return resolve(this);
             });
-            this.collection = collection;
         });
-        return this;
     }
 }
 

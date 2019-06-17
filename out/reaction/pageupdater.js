@@ -2,6 +2,7 @@
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
 /**
+ * PageUpdater class
  * @noInheritDoc
  */
 class PageUpdater extends events_1.EventEmitter {
@@ -26,8 +27,14 @@ class PageUpdater extends events_1.EventEmitter {
         this.embedArray = embedArray;
         this.options = options;
     }
+    /**
+     * Awaits a page update.
+     * @emits page
+     * @emits invalid
+     * @emits cancel
+     */
     awaitPageUpdate() {
-        const pageUpdateOptions = this.options ? this.options : {
+        const pageUpdateOptions = this.options || {
             message: '%u Please pick a page to go to.',
             cancel: true,
             cancelFormat: '%u Successfully canceled request.',
@@ -35,13 +42,12 @@ class PageUpdater extends events_1.EventEmitter {
             invalidPage: '%u Sorry, I could not find that page.',
             success: '%u Set the page to %n',
         };
-        const cancel = pageUpdateOptions.cancel === undefined ? pageUpdateOptions.cancel : true;
-        const format = pageUpdateOptions.cancelFormat ? pageUpdateOptions.cancelFormat : '%u Successfully cancled request.';
-        const time = pageUpdateOptions.time === undefined ? pageUpdateOptions.time : 10000;
-        const invalidPage = pageUpdateOptions.invalidPage ? pageUpdateOptions.invalidPage : '%u Sorry, I could not find that page.';
-        const success = pageUpdateOptions.success ? pageUpdateOptions.success : '%u Set the page number to %n';
-        const message = pageUpdateOptions.message ? pageUpdateOptions.message : '%u Please pick a page to go to.';
-        //const emitter = new EventEmitter();
+        const cancel = pageUpdateOptions.cancel || true;
+        const format = pageUpdateOptions.cancelFormat || '%u Successfully canceled request.';
+        const time = pageUpdateOptions.time || 10000;
+        const invalidPage = pageUpdateOptions.invalidPage || '%u Sorry, I could not find that page.';
+        const success = pageUpdateOptions.success || '%u Set the page number to %n';
+        const message = pageUpdateOptions.message || '%u Please pick a page to go to.';
         this.channel.send(message.replace('%u', `${this.user}`)).then(sent => {
             if (sent instanceof Array)
                 sent = sent[0];

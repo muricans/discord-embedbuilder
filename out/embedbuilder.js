@@ -12,6 +12,7 @@ const discord_js_1 = require("discord.js");
 const events_1 = require("events");
 const pageupdater_1 = require("./reaction/pageupdater");
 /**
+ * EmbedBuilder class
  * @noInheritDoc
  */
 class EmbedBuilder extends events_1.EventEmitter {
@@ -30,16 +31,14 @@ class EmbedBuilder extends events_1.EventEmitter {
     */
     constructor(channel) {
         super();
-        this.embedArray = [];
+        this.embeds = [];
         this.hasColor = false;
         this.emojis = [];
         this.usingPages = true;
         this.time = 60000;
         this.usingPageNumber = true;
         this.pageFormat = '%p/%m';
-        if (channel) {
-            this.channel = channel;
-        }
+        this.channel = channel;
     }
     /**
      * This calculates pages for the builder to work with.
@@ -56,17 +55,20 @@ class EmbedBuilder extends events_1.EventEmitter {
      * @param insert Gives you an embed and the current index.
      */
     calculatePages(data, dataPerPage, insert) {
-        let multiplier = 1;
-        for (let i = 0; i < dataPerPage * multiplier; i++) {
-            if (i === data)
-                break;
-            if (!this.embedArray[multiplier - 1])
-                this.embedArray.push(new discord_js_1.MessageEmbed());
-            insert(this.embedArray[multiplier - 1], i);
-            if (i === (dataPerPage * multiplier) - 1)
-                multiplier++;
-        }
-        return this;
+        return new Promise((resolve, reject) => {
+            let multiplier = 1;
+            for (let i = 0; i < dataPerPage * multiplier; i++) {
+                if (i === data) {
+                    resolve(this);
+                    break;
+                }
+                if (!this.embeds[multiplier - 1])
+                    this.embeds.push(new discord_js_1.MessageEmbed());
+                insert(this.embeds[multiplier - 1], i);
+                if (i === (dataPerPage * multiplier) - 1)
+                    multiplier++;
+            }
+        });
     }
     /**
      *
@@ -113,18 +115,18 @@ class EmbedBuilder extends events_1.EventEmitter {
     /**
      * Adds the embeds given to the end of the current embeds array.
      *
-     * @param embedArray The embeds given here will be put at the end of the current embed array.
+     * @param embeds The embeds given here will be put at the end of the current embed array.
      */
-    concatEmbeds(embedArray) {
-        this.embedArray.concat(embedArray);
+    concatEmbeds(embeds) {
+        this.embeds.concat(embeds);
         return this;
     }
     /**
      *
-     * @param embedArray The array of embeds to use.
+     * @param embeds The array of embeds to use.
      */
-    setEmbeds(embedArray) {
-        this.embedArray = embedArray;
+    setEmbeds(embeds) {
+        this.embeds = embeds;
         return this;
     }
     /**
@@ -140,84 +142,86 @@ class EmbedBuilder extends events_1.EventEmitter {
      * @param embed The embed to push to the array of embeds.
      */
     addEmbed(embed) {
-        this.embedArray.push(embed);
+        this.embeds.push(embed);
         return this;
     }
     /**
      * @returns {MessageEmbed[]} The current embeds that this builder has.
+     * @deprecated Use [[EmbedBuilder.embeds]] instead.
      */
     getEmbeds() {
-        return this.embedArray;
+        process.emitWarning('#getEmbeds() is deprecated. Use #embeds instead.', 'DeprecationWarning');
+        return this.embeds;
     }
     setTitle(title) {
         this._all((i) => {
-            this.embedArray[i].setTitle(title);
+            this.embeds[i].setTitle(title);
         });
         return this;
     }
     setFooter(text, icon) {
         this._all((i) => {
-            this.embedArray[i].setFooter(text, icon);
+            this.embeds[i].setFooter(text, icon);
         });
         return this;
     }
     setDescription(description) {
         this._all(i => {
-            this.embedArray[i].setDescription(description);
+            this.embeds[i].setDescription(description);
         });
         return this;
     }
     setImage(url) {
         this._all(i => {
-            this.embedArray[i].setImage(url);
+            this.embeds[i].setImage(url);
         });
         return this;
     }
     setThumbnail(url) {
         this._all(i => {
-            this.embedArray[i].setThumbnail(url);
+            this.embeds[i].setThumbnail(url);
         });
         return this;
     }
     addBlankField(inline) {
         this._all(i => {
-            this.embedArray[i].addBlankField(inline);
+            this.embeds[i].addBlankField(inline);
         });
         return this;
     }
     spliceField(index, deleteCount, name, value, inline) {
         this._all(i => {
-            this.embedArray[i].spliceField(index, deleteCount, name, value, inline);
+            this.embeds[i].spliceField(index, deleteCount, name, value, inline);
         });
         return this;
     }
     attachFiles(file) {
         this._all(i => {
-            this.embedArray[i].attachFiles(file);
+            this.embeds[i].attachFiles(file);
         });
         return this;
     }
     addField(name, value, inline) {
         this._all((i) => {
-            this.embedArray[i].addField(name, value, inline);
+            this.embeds[i].addField(name, value, inline);
         });
         return this;
     }
     setURL(url) {
         this._all((i) => {
-            this.embedArray[i].setURL(url);
+            this.embeds[i].setURL(url);
         });
         return this;
     }
     setAuthor(name, icon, url) {
         this._all((i) => {
-            this.embedArray[i].setAuthor(name, icon, url);
+            this.embeds[i].setAuthor(name, icon, url);
         });
         return this;
     }
     setTimestamp(timestamp) {
         this._all((i) => {
-            this.embedArray[i].setTimestamp(timestamp);
+            this.embeds[i].setTimestamp(timestamp);
         });
         return this;
     }
@@ -225,7 +229,7 @@ class EmbedBuilder extends events_1.EventEmitter {
      * @ignore
      */
     _all(index) {
-        for (let i = 0; i < this.embedArray.length; i++)
+        for (let i = 0; i < this.embeds.length; i++)
             index(i);
     }
     /**
@@ -250,7 +254,7 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     setColor(color) {
         this._all((i) => {
-            this.embedArray[i].setColor(color);
+            this.embeds[i].setColor(color);
         });
         this.hasColor = true;
         return this;
@@ -260,7 +264,7 @@ class EmbedBuilder extends events_1.EventEmitter {
      */
     _setColor(color) {
         this._all((i) => {
-            this.embedArray[i].setColor(color);
+            this.embeds[i].setColor(color);
         });
         return this;
     }
@@ -335,11 +339,12 @@ class EmbedBuilder extends events_1.EventEmitter {
      * then set the builders current page to the page given.
      *
      * @param user The user to accept a page update from.
+     * @emits pageUpdate
      */
     awaitPageUpdate(user, options) {
         if (!this.channel)
             return;
-        const update = new pageupdater_1.PageUpdater(this.channel, user, this.embedArray, options).awaitPageUpdate();
+        const update = new pageupdater_1.PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
         update.on('page', (page, c) => {
             this.emit('pageUpdate', page);
             c.stop();
@@ -356,96 +361,98 @@ class EmbedBuilder extends events_1.EventEmitter {
      * @listens pageUpdate
      */
     build() {
-        if (!this.channel || !this.embedArray.length)
-            throw new Error('A channel, an array of embeds, and time is required!');
-        const back = this.back ? this.back : '◀';
-        const first = this.first ? this.first : '⏪';
-        const stop = this.stop ? this.stop : '⏹';
-        const last = this.last ? this.last : '⏩';
-        const next = this.next ? this.next : '▶';
-        if (!this.hasColor)
-            this._setColor(0x2872DB);
-        let page = 0;
-        if (this.usingPageNumber)
-            for (let i = 0; i < this.embedArray.length; i++)
-                this.embedArray[i].setFooter(this.pageFormat
-                    .replace('%p', (i + 1).toString())
-                    .replace('%m', this.embedArray.length.toString()));
-        this.channel.send(this.embedArray[page]).then((sent) => __awaiter(this, void 0, void 0, function* () {
-            if (sent instanceof Array)
-                throw new Error('Got multiple messages instead of one');
-            let author;
-            if (sent.author)
-                author = sent.author;
-            else
-                throw new Error('Author was not a user!');
-            if (this.usingPages && this.embedArray.length > 1) {
-                yield sent.react(back);
-                yield sent.react(first);
-                yield sent.react(stop);
-                yield sent.react(last);
-                yield sent.react(next);
-            }
-            if (this.emojis.length) {
-                for (let i = 0; i < this.emojis.length; i++) {
-                    yield sent.react(this.emojis[i].emoji);
+        return new Promise((resolve, reject) => {
+            if (!this.channel || !this.embeds.length)
+                return reject(new Error('A channel, and array of embeds is required.'));
+            const back = this.back ? this.back : '◀';
+            const first = this.first ? this.first : '⏪';
+            const stop = this.stop ? this.stop : '⏹';
+            const last = this.last ? this.last : '⏩';
+            const next = this.next ? this.next : '▶';
+            if (!this.hasColor)
+                this._setColor(0x2872DB);
+            let page = 0;
+            if (this.usingPageNumber)
+                for (let i = 0; i < this.embeds.length; i++)
+                    this.embeds[i].setFooter(this.pageFormat
+                        .replace('%p', (i + 1).toString())
+                        .replace('%m', this.embeds.length.toString()));
+            this.channel.send(this.embeds[page]).then((sent) => __awaiter(this, void 0, void 0, function* () {
+                if (sent instanceof Array)
+                    return reject(new Error('Got multiple messages instead of one.'));
+                let author;
+                if (sent.author)
+                    author = sent.author;
+                else
+                    throw new Error('Author was not a user!');
+                if (this.usingPages && this.embeds.length > 1) {
+                    yield sent.react(back);
+                    yield sent.react(first);
+                    yield sent.react(stop);
+                    yield sent.react(last);
+                    yield sent.react(next);
                 }
-            }
-            this.emit('create', sent, sent.reactions);
-            const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
-                time: this.time,
-            }).on('end', () => {
-                if (!this.hasColor)
-                    sent.edit(this.embedArray[page].setColor(0xE21717));
-                this.emit('stop', sent, page, collection);
-            });
-            collection.on('collect', (reaction, user) => {
-                reaction.users.remove(user);
-                if (this.usingPages && this.embedArray.length > 1) {
-                    switch (reaction.emoji.name) {
-                        case first:
-                            page = 0;
-                            break;
-                        case back:
-                            if (page === 0)
-                                return;
-                            page--;
-                            break;
-                        case stop:
-                            collection.stop();
-                            break;
-                        case next:
-                            if (page === this.embedArray.length - 1)
-                                return;
-                            page++;
-                            break;
-                        case last:
-                            page = this.embedArray.length - 1;
-                            break;
+                if (this.emojis.length) {
+                    for (let i = 0; i < this.emojis.length; i++) {
+                        yield sent.react(this.emojis[i].emoji);
                     }
                 }
-                for (let i = 0; i < this.emojis.length; i++) {
-                    if (reaction.emoji.name === this.emojis[i].emoji)
-                        return this.emojis[i].do(sent, page, this.emojis[i].emoji);
-                }
-                sent.edit(this.embedArray[page]);
-            });
-            this.on('pageUpdate', (newPage) => {
-                newPage = newPage - 1;
-                if (collection.ended)
-                    return;
-                else if (newPage > this.embedArray.length - 1)
-                    return;
-                else if (newPage < 0)
-                    return;
-                else {
-                    page = newPage;
-                    sent.edit(this.embedArray[newPage]);
-                }
-            });
-            this.collection = collection;
-        }));
-        return this;
+                this.emit('create', sent, sent.reactions);
+                const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
+                    time: this.time,
+                }).on('end', () => {
+                    if (!this.hasColor)
+                        sent.edit(this.embeds[page].setColor(0xE21717));
+                    this.emit('stop', sent, page, collection);
+                });
+                collection.on('collect', (reaction, user) => {
+                    reaction.users.remove(user);
+                    if (this.usingPages && this.embeds.length > 1) {
+                        switch (reaction.emoji.name) {
+                            case first:
+                                page = 0;
+                                break;
+                            case back:
+                                if (page === 0)
+                                    return;
+                                page--;
+                                break;
+                            case stop:
+                                collection.stop();
+                                break;
+                            case next:
+                                if (page === this.embeds.length - 1)
+                                    return;
+                                page++;
+                                break;
+                            case last:
+                                page = this.embeds.length - 1;
+                                break;
+                        }
+                    }
+                    for (let i = 0; i < this.emojis.length; i++) {
+                        if (reaction.emoji.name === this.emojis[i].emoji)
+                            return this.emojis[i].do(sent, page, this.emojis[i].emoji);
+                    }
+                    sent.edit(this.embeds[page]);
+                });
+                this.on('pageUpdate', (newPage) => {
+                    newPage = newPage - 1;
+                    if (collection.ended)
+                        return;
+                    else if (newPage > this.embeds.length - 1)
+                        return;
+                    else if (newPage < 0)
+                        return;
+                    else {
+                        page = newPage;
+                        sent.edit(this.embeds[newPage]);
+                    }
+                });
+                this.collection = collection;
+                return resolve(this);
+            }));
+        });
     }
 }
 exports.EmbedBuilder = EmbedBuilder;

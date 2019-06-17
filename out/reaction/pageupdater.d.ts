@@ -27,6 +27,7 @@ export interface PageUpdateOptions {
     success: string;
 }
 /**
+ * PageUpdater class
  * @noInheritDoc
  */
 export declare class PageUpdater extends EventEmitter {
@@ -49,6 +50,12 @@ export declare class PageUpdater extends EventEmitter {
      * @param options Options such as messages, time, cancel.
      */
     constructor(channel: TextChannel | DMChannel, user: User, embedArray: MessageEmbed[], options?: PageUpdateOptions);
+    /**
+     * Awaits a page update.
+     * @emits page
+     * @emits invalid
+     * @emits cancel
+     */
     awaitPageUpdate(): this;
 }
 export declare namespace PageUpdater {

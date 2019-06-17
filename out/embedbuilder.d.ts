@@ -8,15 +8,19 @@ interface Emojis {
     emoji: (sent: Message, page: number, emoji: string) => void;
 }
 /**
+ * EmbedBuilder class
  * @noInheritDoc
  */
 export declare class EmbedBuilder extends EventEmitter {
-    private embedArray;
+    /**
+     * The channel being used with the EmbedBuilder.
+     */
+    channel: TextChannel | DMChannel;
+    embeds: MessageEmbed[];
     private hasColor;
     private emojis;
     private usingPages;
     private collection;
-    private channel;
     private time;
     private back;
     private next;
@@ -38,7 +42,7 @@ export declare class EmbedBuilder extends EventEmitter {
     * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
     * ```
     */
-    constructor(channel?: TextChannel | DMChannel);
+    constructor(channel: TextChannel | DMChannel);
     /**
      * This calculates pages for the builder to work with.
      * ```javascript
@@ -53,7 +57,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this;
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): Promise<this>;
     /**
      *
      * @param use Use the page system for the embed.
@@ -87,14 +91,14 @@ export declare class EmbedBuilder extends EventEmitter {
     /**
      * Adds the embeds given to the end of the current embeds array.
      *
-     * @param embedArray The embeds given here will be put at the end of the current embed array.
+     * @param embeds The embeds given here will be put at the end of the current embed array.
      */
-    concatEmbeds(embedArray: MessageEmbed[]): this;
+    concatEmbeds(embeds: MessageEmbed[]): this;
     /**
      *
-     * @param embedArray The array of embeds to use.
+     * @param embeds The array of embeds to use.
      */
-    setEmbeds(embedArray: MessageEmbed[]): this;
+    setEmbeds(embeds: MessageEmbed[]): this;
     /**
      *
      * @param time The amount of time the bot will allow reactions for.
@@ -107,6 +111,7 @@ export declare class EmbedBuilder extends EventEmitter {
     addEmbed(embed: MessageEmbed): this;
     /**
      * @returns {MessageEmbed[]} The current embeds that this builder has.
+     * @deprecated Use [[EmbedBuilder.embeds]] instead.
      */
     getEmbeds(): MessageEmbed[];
     setTitle(title: string): this;
@@ -170,6 +175,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * then set the builders current page to the page given.
      *
      * @param user The user to accept a page update from.
+     * @emits pageUpdate
      */
     awaitPageUpdate(user: User, options?: PageUpdateOptions): this | undefined;
     /**
@@ -178,7 +184,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * @emits create
      * @listens pageUpdate
      */
-    build(): this;
+    build(): Promise<this>;
 }
 export declare namespace EmbedBuilder {
 }
