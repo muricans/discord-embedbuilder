@@ -1,6 +1,6 @@
 {
   "name": "discord-embedbuilder",
-  "version": "2.2.0",
+  "version": "3.0.0",
   "description": "Build embeds with multiple pages easily for discord.js",
   "main": "out/index.js",
   "types": "out/index.d.ts",
