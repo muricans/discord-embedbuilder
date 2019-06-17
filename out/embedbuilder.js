@@ -102,11 +102,11 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
-     * @deprecated Use constructor to set the channel instead. Will be removed on update 3.0.0
-     * @param channel The channel the embed will be sent to.
+     * **<span style="color:red">Warning:</span>** This should not be used to set the channel. You can set that in the constructor
+     *
+     * @param channel The channel to switch the current one to.
      */
-    setChannel(channel) {
-        process.emitWarning('setChannel is deprecated, please use the constructor to set the channel instead.', 'DeprecationWarning');
+    changeChannel(channel) {
         this.channel = channel;
         return this;
     }
@@ -229,46 +229,6 @@ class EmbedBuilder extends events_1.EventEmitter {
             index(i);
     }
     /**
-     * Set the emoji for going backwards.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setBackEmoji(unicodeEmoji) {
-        this.back = unicodeEmoji;
-        return this;
-    }
-    /**
-     * Set the emoji for going forward.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setNextEmoji(unicodeEmoji) {
-        this.next = unicodeEmoji;
-        return this;
-    }
-    /**
-     * Set the emoji to stop the embed from listening for reactions.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setStopEmoji(unicodeEmoji) {
-        this.stop = unicodeEmoji;
-        return this;
-    }
-    /**
-     * Set the emoji to go to the first page.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setFirstEmoji(unicodeEmoji) {
-        this.first = unicodeEmoji;
-        return this;
-    }
-    /**
-     * Set the emoji to go the the last page.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setLastEmoji(unicodeEmoji) {
-        this.last = unicodeEmoji;
-        return this;
-    }
-    /**
      * Add an emoji which will perform it's own action when pressed.
      */
     addEmoji(unicodeEmoji, func) {
@@ -336,17 +296,10 @@ class EmbedBuilder extends events_1.EventEmitter {
      * @param emojis The emojis to push.
      */
     addEmojis(emojis) {
-        if (emojis instanceof Array) {
-            process.emitWarning('Use a single object to add emojis instead.', 'DeprecationWarning');
-            for (let i = 0; i < emojis.length; i++)
-                this.addEmoji(emojis[i].emoji, emojis[i].do);
-        }
-        else {
-            const keys = Object.keys(emojis);
-            const values = Object.values(emojis);
-            for (let i = 0; i < keys.length; i++)
-                this.addEmoji(keys[i], values[i]);
-        }
+        const keys = Object.keys(emojis);
+        const values = Object.values(emojis);
+        for (let i = 0; i < keys.length; i++)
+            this.addEmoji(keys[i], values[i]);
         return this;
     }
     /**

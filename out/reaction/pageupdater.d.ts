@@ -26,6 +26,9 @@ export interface PageUpdateOptions {
      */
     success: string;
 }
+/**
+ * @noInheritDoc
+ */
 export declare class PageUpdater extends EventEmitter {
     private channel;
     private user;

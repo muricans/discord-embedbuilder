@@ -7,15 +7,23 @@ npm module to make creating embeds with mutliple pages a little bit easier
 
 [v12 Documentation](https://muricans.github.io/embedbuilder)
 
+[master (embedbuilder v3.0.0) documentation](https://muricans.github.io/embedbuilder/master)
+
 ## Quick Install
+discord.js v11
+
 `npm install muricans/discord-embedbuilder#v11`
 
 discord.js v12
 
 `npm install discord-embedbuilder`
 
+master (embedbuilder v3.0.0)
+
+`npm install muricans/discord-embedbuilder`
+
 ## Methods
-Some methods here are different than those for discord.js v11.
+Some methods here are different than those for discord.js v11 and v12.
 
 All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/master/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
 
@@ -23,9 +31,11 @@ All methods that have the same names as the ones from [MessageEmbed](https://dis
 
 If this is set to false, the builder will not use the next, back, last, first, stop emotes.
 
-`setChannel(channel)`
+`changeChannel(channel)`
 
-The channel that is set here will be the channel the pages are sent to.
+Change the current channel.
+
+**<span style="color:red">Warning:</span>** This should not be used to set the channel. You can set the channel in the constructor.
 
 `setEmbeds(embeds)`
 
@@ -46,10 +56,6 @@ This will set how long the builder should listen for emotes. Make sure to set yo
 `getEmbeds()`
 
 Returns the current embeds that the builder has.
-
-`setBackEmoji, setNextEmoji, setFirstEmoji, setLastEmoji, setStopEmoji`
-
-Insert a unicode emoji into one of these methods, and the embedbuilder will use it as the corresponding method name.
 
 `addEmoji(emoji, (sent, page, builder, emoji))`
 
@@ -123,23 +129,25 @@ Types allowed: back, first, stop, last, next
 
 `awaitPageUpdate(user, options)`
 
-[options](https://muricans.github.io/embedbuilder/interfaces/pageupdateoptions.html)
+[options](https://muricans.github.io/embedbuilder/master/interfaces/pageupdateoptions.html)
 
 Create an updater to await responses from a user,
 then set the builders current page to the page given.
 
 ## Events
-[`create`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#create)
+[`create`](https://muricans.github.io/embedbuilder/master/classes/embedbuilder.html#create)
 
 Emitted from build() when the first page has finished building.
 
-[`stop`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#delete)
+[`stop`](https://muricans.github.io/embedbuilder/master/classes/embedbuilder.html#stop)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-[`pageUpdate`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#pageUpdate)
+[`pageUpdate`](https://muricans.github.io/embedbuilder/master/classes/embedbuilder.html#pageUpdate)
 
 Emitted from updatePage(). Sets the new page for the bot.
+
+PageUpdater documentation can be found [here](https://muricans.github.io/embedbuilder/master/classes/pageupdater.html).
 
 ## Example
 First import discord-embedbuilder into your project.

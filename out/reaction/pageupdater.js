@@ -1,6 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 const events_1 = require("events");
+/**
+ * @noInheritDoc
+ */
 class PageUpdater extends events_1.EventEmitter {
     /**
      * Create a PageUpdater to await a response from a user, and set the embedArray to the provided number.

@@ -4,13 +4,6 @@ import { PageUpdateOptions } from './reaction/pageupdater';
 /**
  * @private
  */
-interface Emoji {
-    emoji: string;
-    do: (sent: Message, page: number, emoji: string) => void | undefined;
-}
-/**
- * @private
- */
 interface Emojis {
     emoji: (sent: Message, page: number, emoji: string) => void;
 }
@@ -86,10 +79,11 @@ export declare class EmbedBuilder extends EventEmitter {
      */
     setPageFormat(format: string): this;
     /**
-     * @deprecated Use constructor to set the channel instead. Will be removed on update 3.0.0
-     * @param channel The channel the embed will be sent to.
+     * **<span style="color:red">Warning:</span>** This should not be used to set the channel. You can set that in the constructor
+     *
+     * @param channel The channel to switch the current one to.
      */
-    setChannel(channel: TextChannel | DMChannel): this;
+    changeChannel(channel: TextChannel | DMChannel): this;
     /**
      * Adds the embeds given to the end of the current embeds array.
      *
@@ -132,31 +126,6 @@ export declare class EmbedBuilder extends EventEmitter {
      */
     private _all;
     /**
-     * Set the emoji for going backwards.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setBackEmoji(unicodeEmoji: string): this;
-    /**
-     * Set the emoji for going forward.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setNextEmoji(unicodeEmoji: string): this;
-    /**
-     * Set the emoji to stop the embed from listening for reactions.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setStopEmoji(unicodeEmoji: string): this;
-    /**
-     * Set the emoji to go to the first page.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setFirstEmoji(unicodeEmoji: string): this;
-    /**
-     * Set the emoji to go the the last page.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    setLastEmoji(unicodeEmoji: string): this;
-    /**
      * Add an emoji which will perform it's own action when pressed.
      */
     addEmoji(unicodeEmoji: string, func: (sent: Message, page: number, emoji: string) => void): this;
@@ -188,7 +157,7 @@ export declare class EmbedBuilder extends EventEmitter {
      *
      * @param emojis The emojis to push.
      */
-    addEmojis(emojis: Emojis | Emoji[]): this;
+    addEmojis(emojis: Emojis): this;
     /**
      * Replaces current type of emoji given with the new emoji provided.
      *

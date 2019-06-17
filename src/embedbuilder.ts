@@ -19,7 +19,7 @@ import { PageUpdateOptions, PageUpdater } from './reaction/pageupdater';
  */
 interface Emoji {
     emoji: string;
-    do: (sent: Message, page: number, emoji: string) => void | undefined;
+    do: (sent: Message, page: number, emoji: string) => void;
 }
 
 /**
@@ -133,11 +133,11 @@ export class EmbedBuilder extends EventEmitter {
     }
 
     /**
-     * @deprecated Use constructor to set the channel instead. Will be removed on update 3.0.0
-     * @param channel The channel the embed will be sent to.
+     * **<span style="color:red">Warning:</span>** This should not be used to set the channel. You can set that in the constructor
+     * 
+     * @param channel The channel to switch the current one to.
      */
-    public setChannel(channel: TextChannel | DMChannel) {
-        process.emitWarning('setChannel is deprecated, please use the constructor to set the channel instead.', 'DeprecationWarning');
+    public changeChannel(channel: TextChannel | DMChannel) {
         this.channel = channel;
         return this;
     }
@@ -279,51 +279,6 @@ export class EmbedBuilder extends EventEmitter {
     }
 
     /**
-     * Set the emoji for going backwards.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    public setBackEmoji(unicodeEmoji: string) {
-        this.back = unicodeEmoji;
-        return this;
-    }
-
-    /**
-     * Set the emoji for going forward.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    public setNextEmoji(unicodeEmoji: string) {
-        this.next = unicodeEmoji;
-        return this;
-    }
-
-    /**
-     * Set the emoji to stop the embed from listening for reactions.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    public setStopEmoji(unicodeEmoji: string) {
-        this.stop = unicodeEmoji;
-        return this;
-    }
-
-    /**
-     * Set the emoji to go to the first page.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    public setFirstEmoji(unicodeEmoji: string) {
-        this.first = unicodeEmoji;
-        return this;
-    }
-
-    /**
-     * Set the emoji to go the the last page.
-     * @deprecated Use [[EmbedBuilder.setPageEmoji]] instead.
-     */
-    public setLastEmoji(unicodeEmoji: string) {
-        this.last = unicodeEmoji;
-        return this;
-    }
-
-    /**
      * Add an emoji which will perform it's own action when pressed.
      */
     public addEmoji(unicodeEmoji: string, func: (sent: Message, page: number, emoji: string) => void) {
@@ -394,17 +349,11 @@ export class EmbedBuilder extends EventEmitter {
      * 
      * @param emojis The emojis to push.
      */
-    public addEmojis(emojis: Emojis | Emoji[]) {
-        if (emojis instanceof Array) {
-            process.emitWarning('Use a single object to add emojis instead.', 'DeprecationWarning');
-            for (let i = 0; i < emojis.length; i++)
-                this.addEmoji(emojis[i].emoji, emojis[i].do);
-        } else {
-            const keys = Object.keys(emojis);
-            const values = Object.values(emojis);
-            for (let i = 0; i < keys.length; i++)
-                this.addEmoji(keys[i], values[i]);
-        }
+    public addEmojis(emojis: Emojis) {
+        const keys = Object.keys(emojis);
+        const values = Object.values(emojis);
+        for (let i = 0; i < keys.length; i++)
+            this.addEmoji(keys[i], values[i]);
         return this;
     }
 
