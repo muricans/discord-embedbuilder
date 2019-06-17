@@ -118,7 +118,7 @@ class EmbedBuilder extends events_1.EventEmitter {
      * @param embeds The embeds given here will be put at the end of the current embed array.
      */
     concatEmbeds(embeds) {
-        this.embeds.concat(embeds);
+        this.embeds = this.embeds.concat(embeds);
         return this;
     }
     /**

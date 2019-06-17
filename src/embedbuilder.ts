@@ -154,7 +154,7 @@ export class EmbedBuilder extends EventEmitter {
      * @param embeds The embeds given here will be put at the end of the current embed array.
      */
     public concatEmbeds(embeds: MessageEmbed[]) {
-        this.embeds.concat(embeds);
+        this.embeds = this.embeds.concat(embeds);
         return this;
     }
 
