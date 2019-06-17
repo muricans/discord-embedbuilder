@@ -1,4 +1,6 @@
 # discord-embedbuilder
+[![dependencies Status](https://david-dm.org/muricans/discord-embedbuilder/status.svg)](https://david-dm.org/muricans/discord-embedbuilder)
+
 [![NPM](https://nodei.co/npm/discord-embedbuilder.png?downloads=true)](https://nodei.co/npm/discord-embedbuilder)
 
 npm module to make creating embeds with mutliple pages a little bit easier
