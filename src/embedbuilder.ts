@@ -437,6 +437,12 @@ export class EmbedBuilder extends EventEmitter {
         return this;
     }
 
+    /**
+     * Create an updater to await responses from a user,
+     * then set the builders current page to the page given.
+     * 
+     * @param user The user to accept a page update from.
+     */
     awaitPageUpdate(user: User, options?: PageUpdateOptions) {
         if (!this.channel) return;
         const update = new PageUpdater(this.channel, user, this.embedArray, options).awaitPageUpdate();

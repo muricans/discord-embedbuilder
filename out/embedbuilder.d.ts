@@ -196,6 +196,12 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param newEmoji This emoji will replace the current page emoji for the given type.
      */
     setPageEmoji(emoji: string, newEmoji: string): this;
+    /**
+     * Create an updater to await responses from a user,
+     * then set the builders current page to the page given.
+     *
+     * @param user The user to accept a page update from.
+     */
     awaitPageUpdate(user: User, options?: PageUpdateOptions): this | undefined;
     /**
      * Builds the embed.

@@ -121,6 +121,13 @@ Replaces current type of emoji given with the new emoji provided.
 
 Types allowed: back, first, stop, last, next
 
+`awaitPageUpdate(user, options)`
+
+[options](https://muricans.github.io/embedbuilder/interfaces/pageupdateoptions.html)
+
+Create an updater to await responses from a user,
+then set the builders current page to the page given.
+
 ## Events
 [`create`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#create)
 
@@ -130,7 +137,7 @@ Emitted from build() when the first page has finished building.
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-['pageUpdate'](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#pageUpdate)
+[`pageUpdate`](https://muricans.github.io/embedbuilder/classes/embedbuilder.html#pageUpdate)
 
 Emitted from updatePage(). Sets the new page for the bot.
 
@@ -138,7 +145,9 @@ Emitted from updatePage(). Sets the new page for the bot.
 First import discord-embedbuilder into your project.
 
 ```javascript
-const EmbedBuilder = require('discord-embedbuilder');
+const {
+    EmbedBuilder,
+ } = require('discord-embedbuilder');
 ```
 
 Create a command or some way to get a channel to pass through the builder. If you are unsure on how to make a command, checking [this](https://discordjs.guide/) out might be helpful.

@@ -1,11 +1,29 @@
 import { EventEmitter } from "events";
 import { TextChannel, User, MessageEmbed, DMChannel } from "discord.js";
 export interface PageUpdateOptions {
+    /**
+     * The initial message to send. Use %u to reference the user.
+     */
     message: string;
     time: number;
+    /**
+     * Do you want to use a cancel message?
+     */
     cancel: boolean;
+    /**
+     * If cancel is true, then this is the format the cancel message will follow.
+     * Use %u to reference the user.
+     */
     cancelFormat: string;
+    /**
+     * The message that is sent when it receives an invalid page.
+     * Use %u to reference the user.
+     */
     invalidPage: string;
+    /**
+     * The message sent when it has received a valid page.
+     * Use %u to reference the user, %n to get the number they gave.
+     */
     success: string;
 }
 export declare class PageUpdater extends EventEmitter {
