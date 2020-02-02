@@ -11,6 +11,8 @@ npm module to make creating embeds with mutliple pages a little bit easier
 
 [master (embedbuilder v3.0.0) documentation](https://muricans.github.io/embedbuilder/master)
 
+The master branch is experimental, so use at your own risk.
+
 ## Quick Install
 discord.js v11
 
