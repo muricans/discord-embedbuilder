@@ -85,21 +85,18 @@ export class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): Promise<this> {
-        return new Promise((resolve, reject) => {
-            let multiplier = 1;
-            for (let i = 0; i < dataPerPage * multiplier; i++) {
-                if (i === data) {
-                    resolve(this);
-                    break;
-                }
-                if (!this.embeds[multiplier - 1])
-                    this.embeds.push(new MessageEmbed());
-                insert(this.embeds[multiplier - 1], i);
-                if (i === (dataPerPage * multiplier) - 1)
-                    multiplier++;
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void) {
+        let multiplier = 1;
+        for (let i = 0; i < dataPerPage * multiplier; i++) {
+            if (i === data) {
+                break;
             }
-        });
+            if (!this.embeds[multiplier - 1])
+                this.embeds.push(new MessageEmbed());
+            insert(this.embeds[multiplier - 1], i);
+            if (i === (dataPerPage * multiplier) - 1)
+                multiplier++;
+        }
     }
 
     /**
