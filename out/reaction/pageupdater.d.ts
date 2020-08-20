@@ -1,3 +1,4 @@
+/// <reference types="node" />
 import { EventEmitter } from "events";
 import { TextChannel, User, MessageEmbed, DMChannel } from "discord.js";
 export interface PageUpdateOptions {

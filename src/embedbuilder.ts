@@ -10,6 +10,7 @@ import {
     MessageReaction,
     MessageAttachment,
     User,
+    EmbedFieldData,
 } from "discord.js";
 import { EventEmitter } from "events";
 import { PageUpdateOptions, PageUpdater } from './reaction/pageupdater';
@@ -226,16 +227,27 @@ export class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public addBlankField(inline?: boolean) {
+    // No longer exists
+    /*public addBlankField(inline?: boolean) {
         this._all(i => {
-            this.embeds[i].addBlankField(inline);
+            this.embeds[i].addBlankFields(inline);
+        });
+        return this;
+    }*/
+
+    public spliceField(index: number, deleteCount: number, field?: EmbedFieldData) {
+        this._all(i => {
+            if (field)
+                this.embeds[i].spliceFields(index, deleteCount, field);
+            else
+                this.embeds[i].spliceFields(index, deleteCount);
         });
         return this;
     }
 
-    public spliceField(index: number, deleteCount: number, name?: any, value?: any, inline?: boolean) {
+    public spliceFields(index: number, deleteCount: number, fields: EmbedFieldData[]) {
         this._all(i => {
-            this.embeds[i].spliceField(index, deleteCount, name, value, inline);
+            this.embeds[i].spliceFields(index, deleteCount, fields);
         });
         return this;
     }
@@ -247,9 +259,26 @@ export class EmbedBuilder extends EventEmitter {
         return this;
     }
 
+    /**
+     * Adds a single field to all embeds.
+     * @param name Name of the field
+     * @param value Value of the field
+     * @param inline Inline?
+     */
     public addField(name: any, value: any, inline?: boolean) {
         this._all((i) => {
-            this.embeds[i].addField(name, value, inline);
+            this.embeds[i].addFields(name, value, inline);
+        });
+        return this;
+    }
+
+    /**
+     * Adds multiple fields to all embeds.
+     * @param fields An array of EmbedFieldData
+     */
+    public addFields(fields: EmbedFieldData[]) {
+        this._all((i) => {
+            this.embeds[i].addFields(fields);
         });
         return this;
     }
@@ -386,7 +415,7 @@ export class EmbedBuilder extends EventEmitter {
                 this.next = newEmoji;
                 break;
             default:
-                throw new Error('Unreconized emoji name. Use types: bacl, first, stop, last or next');
+                throw new Error('Unreconized emoji name. Use types: back, first, stop, last or next');
         }
         return this;
     }
@@ -401,7 +430,7 @@ export class EmbedBuilder extends EventEmitter {
     awaitPageUpdate(user: User, options?: PageUpdateOptions) {
         if (!this.channel) return;
         const update = new PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
-        update.on('page', (page, c) => {
+        update.on('page', (page, a, c) => {
             this.emit('pageUpdate', page);
             c.stop();
         });
@@ -428,6 +457,7 @@ export class EmbedBuilder extends EventEmitter {
             if (!this.hasColor)
                 this._setColor(0x2872DB);
             let page = 0;
+            // Is embed using page footer
             if (this.usingPageNumber)
                 for (let i = 0; i < this.embeds.length; i++)
                     this.embeds[i].setFooter(this.pageFormat
@@ -441,6 +471,7 @@ export class EmbedBuilder extends EventEmitter {
                     author = sent.author;
                 else
                     throw new Error('Author was not a user!');
+                // Embed has multiple pages, set up emoji buttons
                 if (this.usingPages && this.embeds.length > 1) {
                     await sent.react(back);
                     await sent.react(first);
@@ -448,12 +479,14 @@ export class EmbedBuilder extends EventEmitter {
                     await sent.react(last);
                     await sent.react(next);
                 }
+                // React with custom emojis, if any were given.
                 if (this.emojis.length) {
                     for (let i = 0; i < this.emojis.length; i++) {
                         await sent.react(this.emojis[i].emoji);
                     }
                 }
                 this.emit('create', sent, sent.reactions);
+                // Set up collection event.
                 const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
                     time: this.time,
                 }).on('end', () => {
@@ -492,11 +525,7 @@ export class EmbedBuilder extends EventEmitter {
                 });
                 this.on('pageUpdate', (newPage) => {
                     newPage = newPage - 1;
-                    if (collection.ended)
-                        return;
-                    else if (newPage > this.embeds.length - 1)
-                        return;
-                    else if (newPage < 0)
+                    if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
                     else {
                         page = newPage;

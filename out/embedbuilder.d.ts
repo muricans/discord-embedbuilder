@@ -1,4 +1,5 @@
-import { TextChannel, MessageEmbed, Message, ColorResolvable, FileOptions, DMChannel, MessageAttachment, User } from "discord.js";
+/// <reference types="node" />
+import { TextChannel, MessageEmbed, Message, ColorResolvable, FileOptions, DMChannel, MessageAttachment, User, EmbedFieldData } from "discord.js";
 import { EventEmitter } from "events";
 import { PageUpdateOptions } from './reaction/pageupdater';
 /**
@@ -57,7 +58,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): Promise<this>;
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): void;
     /**
      *
      * @param use Use the page system for the embed.
@@ -119,10 +120,21 @@ export declare class EmbedBuilder extends EventEmitter {
     setDescription(description: any): this;
     setImage(url: string): this;
     setThumbnail(url: string): this;
-    addBlankField(inline?: boolean): this;
-    spliceField(index: number, deleteCount: number, name?: any, value?: any, inline?: boolean): this;
+    spliceField(index: number, deleteCount: number, field?: EmbedFieldData): this;
+    spliceFields(index: number, deleteCount: number, fields: EmbedFieldData[]): this;
     attachFiles(file: (string | MessageAttachment | FileOptions)[]): this;
+    /**
+     * Adds a single field to all embeds.
+     * @param name Name of the field
+     * @param value Value of the field
+     * @param inline Inline?
+     */
     addField(name: any, value: any, inline?: boolean): this;
+    /**
+     * Adds multiple fields to all embeds.
+     * @param fields An array of EmbedFieldData
+     */
+    addFields(fields: EmbedFieldData[]): this;
     setURL(url: string): this;
     setAuthor(name: any, icon?: string, url?: string): this;
     setTimestamp(timestamp?: Date | number): this;
