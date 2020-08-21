@@ -5,31 +5,18 @@
 
 npm module to make creating embeds with mutliple pages a little bit easier
 
-[v11 Documentation](https://muricans.github.io/embedbuilder/v11)
-
-[v12 Documentation](https://muricans.github.io/embedbuilder)
-
-[master (embedbuilder v3.0.0) documentation](https://muricans.github.io/embedbuilder/master)
-
-The master branch is experimental, so use at your own risk.
+[latest version documentation](http://github.muricans.xyz/embedbuilder)
 
 ## Quick Install
-discord.js v11
 
-`npm install muricans/discord-embedbuilder#v11`
-
-discord.js v12
+discord-embedbuilder v3.0.0
 
 `npm install discord-embedbuilder`
 
-master (embedbuilder v3.0.0)
-
-`npm install muricans/discord-embedbuilder`
+discord-embedbuilder uses the latest stable version of discord.js (which as of 8/21/2020 is 12.3.1)
 
 ## Methods
-Some methods here are different than those for discord.js v11 and v12.
-
-All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/master/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
+All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
 
 `usePages(use)`
 
