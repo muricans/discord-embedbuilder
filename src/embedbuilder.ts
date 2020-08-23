@@ -234,27 +234,12 @@ export class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    // No longer exists
-    /*public addBlankField(inline?: boolean) {
+    public spliceFields(index: number, deleteCount: number, fields?: EmbedFieldData[]) {
         this._all(i => {
-            this.embeds[i].addBlankFields(inline);
-        });
-        return this;
-    }*/
-
-    public spliceField(index: number, deleteCount: number, field?: EmbedFieldData) {
-        this._all(i => {
-            if (field)
-                this.embeds[i].spliceFields(index, deleteCount, field);
-            else
+            if (!fields)
                 this.embeds[i].spliceFields(index, deleteCount);
-        });
-        return this;
-    }
-
-    public spliceFields(index: number, deleteCount: number, fields: EmbedFieldData[]) {
-        this._all(i => {
-            this.embeds[i].spliceFields(index, deleteCount, fields);
+            else
+                this.embeds[i].spliceFields(index, deleteCount, fields);
         });
         return this;
     }
@@ -449,7 +434,8 @@ export class EmbedBuilder extends EventEmitter {
         const update = new PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
         update.on('page', (page, a, c) => {
             this.emit('pageUpdate', page);
-            c.stop();
+            if (options?.singleListen)
+                c.stop();
         });
         update.on('cancel', c => {
             c.stop();
@@ -535,6 +521,7 @@ export class EmbedBuilder extends EventEmitter {
                         await sent.react(this.emojis[i].emoji);
                     }
                 }
+                // Finished sending first page + reactions, emit create event.
                 this.emit('create', sent, sent.reactions);
                 // Set up collection event.
                 const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {

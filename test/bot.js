@@ -34,8 +34,12 @@ client.on('message', async message => {
     .setTitle('Commands')
     .defaultReactions([])
     .concatEmbeds(other.embeds)
+    .spliceFields(3, 1)
     .build().then(() => {
-      help.awaitPageUpdate(message.author);
+      help.awaitPageUpdate(message.author, {
+        success: '%u I set it to %n',
+        singleListen: false,
+      });
     });
 });
 

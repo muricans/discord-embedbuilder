@@ -124,8 +124,7 @@ export declare class EmbedBuilder extends EventEmitter {
     setDescription(description: any): this;
     setImage(url: string): this;
     setThumbnail(url: string): this;
-    spliceField(index: number, deleteCount: number, field?: EmbedFieldData): this;
-    spliceFields(index: number, deleteCount: number, fields: EmbedFieldData[]): this;
+    spliceFields(index: number, deleteCount: number, fields?: EmbedFieldData[]): this;
     attachFiles(file: (string | MessageAttachment | FileOptions)[]): this;
     /**
      * Adds a single field to all embeds.

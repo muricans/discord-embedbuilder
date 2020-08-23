@@ -15,11 +15,11 @@ discord-embedbuilder v3.0.1 (current stable)
 
 `npm install discord-embedbuilder`
 
-discord-embedbuilder master repo (unstable)
+discord-embedbuilder master repo (latest features & fixes)
 
 `npm install muricans/discord-embedbuilder`
 
-discord-embedbuilder uses the latest stable version of discord.js (which as of 8/21/2020 is 12.3.1)
+discord-embedbuilder uses the latest stable version of discord.js (12.3.1)
 
 ## Methods
 All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.

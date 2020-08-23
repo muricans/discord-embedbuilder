@@ -186,25 +186,12 @@ class EmbedBuilder extends events_1.EventEmitter {
         });
         return this;
     }
-    // No longer exists
-    /*public addBlankField(inline?: boolean) {
-        this._all(i => {
-            this.embeds[i].addBlankFields(inline);
-        });
-        return this;
-    }*/
-    spliceField(index, deleteCount, field) {
-        this._all(i => {
-            if (field)
-                this.embeds[i].spliceFields(index, deleteCount, field);
-            else
-                this.embeds[i].spliceFields(index, deleteCount);
-        });
-        return this;
-    }
     spliceFields(index, deleteCount, fields) {
         this._all(i => {
-            this.embeds[i].spliceFields(index, deleteCount, fields);
+            if (!fields)
+                this.embeds[i].spliceFields(index, deleteCount);
+            else
+                this.embeds[i].spliceFields(index, deleteCount, fields);
         });
         return this;
     }
@@ -385,7 +372,8 @@ class EmbedBuilder extends events_1.EventEmitter {
         const update = new pageupdater_1.PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
         update.on('page', (page, a, c) => {
             this.emit('pageUpdate', page);
-            c.stop();
+            if (options === null || options === void 0 ? void 0 : options.singleListen)
+                c.stop();
         });
         update.on('cancel', c => {
             c.stop();
@@ -468,6 +456,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                         yield sent.react(this.emojis[i].emoji);
                     }
                 }
+                // Finished sending first page + reactions, emit create event.
                 this.emit('create', sent, sent.reactions);
                 // Set up collection event.
                 const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {

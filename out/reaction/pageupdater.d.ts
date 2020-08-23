@@ -6,6 +6,9 @@ export interface PageUpdateOptions {
      * The initial message to send. Use %u to reference the user.
      */
     message: string;
+    /**
+     * How long should it listen for messages?
+     */
     time: number;
     /**
      * Do you want to use a cancel message?
@@ -16,6 +19,10 @@ export interface PageUpdateOptions {
      * Use %u to reference the user.
      */
     cancelFormat: string;
+    /**
+     * Should it stop listening after it recieves the first message?
+     */
+    singleListen: boolean;
     /**
      * The message that is sent when it receives an invalid page.
      * Use %u to reference the user.
@@ -35,7 +42,7 @@ export declare class PageUpdater extends EventEmitter {
     private channel;
     private user;
     private embedArray;
-    private options?;
+    private options;
     /**
      * Create a PageUpdater to await a response from a user, and set the embedArray to the provided number.
      * ```javascript

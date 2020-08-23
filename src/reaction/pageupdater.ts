@@ -6,6 +6,9 @@ export interface PageUpdateOptions {
      * The initial message to send. Use %u to reference the user.
      */
     message: string;
+    /**
+     * How long should it listen for messages?
+     */
     time: number;
     /**
      * Do you want to use a cancel message?
@@ -16,6 +19,10 @@ export interface PageUpdateOptions {
      * Use %u to reference the user.
      */
     cancelFormat: string;
+    /**
+     * Should it stop listening after it recieves the first message?
+     */
+    singleListen: boolean;
     /**
      * The message that is sent when it receives an invalid page.
      * Use %u to reference the user.
@@ -36,7 +43,15 @@ export class PageUpdater extends EventEmitter {
     private channel: TextChannel | DMChannel;
     private user: User;
     private embedArray: MessageEmbed[];
-    private options?: PageUpdateOptions;
+    private options: PageUpdateOptions = {
+        message: '%u Please pick a page to go to.',
+        cancel: true,
+        cancelFormat: '%u Successfully canceled request',
+        singleListen: false,
+        time: 10000,
+        invalidPage: '%u Sorry, I could not find that page.',
+        success: '%u Set the page to %n',
+    };
     /**
      * Create a PageUpdater to await a response from a user, and set the embedArray to the provided number.
      * ```javascript
@@ -56,7 +71,15 @@ export class PageUpdater extends EventEmitter {
         this.channel = channel;
         this.user = user;
         this.embedArray = embedArray;
-        this.options = options;
+        if (options) {
+            this.options.message = options.message || this.options.message;
+            this.options.cancel = options.cancel || this.options.cancel;
+            this.options.cancelFormat = options.cancelFormat || this.options.cancelFormat;
+            this.options.singleListen = options.singleListen || this.options.singleListen;
+            this.options.time = options.time || this.options.time;
+            this.options.invalidPage = options.invalidPage || this.options.invalidPage;
+            this.options.success = options.success || this.options.success;
+        }
     }
     /**
      * Awaits a page update.
@@ -65,20 +88,9 @@ export class PageUpdater extends EventEmitter {
      * @emits cancel
      */
     public awaitPageUpdate() {
-        const pageUpdateOptions = this.options || {
-            message: '%u Please pick a page to go to.',
-            cancel: true,
-            cancelFormat: '%u Successfully canceled request.',
-            time: 10000,
-            invalidPage: '%u Sorry, I could not find that page.',
-            success: '%u Set the page to %n',
-        };
-        const cancel = pageUpdateOptions.cancel || true;
-        const format = pageUpdateOptions.cancelFormat || '%u Successfully canceled request.';
-        const time = pageUpdateOptions.time || 10000;
-        const invalidPage = pageUpdateOptions.invalidPage || '%u Sorry, I could not find that page.';
-        const success = pageUpdateOptions.success || '%u Set the page number to %n';
-        const message = pageUpdateOptions.message || '%u Please pick a page to go to.';
+        const {
+            message, cancel, cancelFormat, time, invalidPage, success,
+        } = this.options;
         this.channel.send(message.replace('%u', `${this.user}`)).then(sent => {
             if (sent instanceof Array) sent = sent[0];
             const collector = sent.channel.createMessageCollector(msg => msg.author.id === this.user.id, {
@@ -88,7 +100,7 @@ export class PageUpdater extends EventEmitter {
                 const page = parseInt(response.content);
                 if (isNaN(page) && response.content.startsWith('cancel') && cancel) {
                     this.emit('cancel', collector, response.content);
-                    response.channel.send(format.replace('%u', response.author));
+                    response.channel.send(cancelFormat.replace('%u', response.author));
                 } else if (!isNaN(page)) {
                     if (page < 1 || page > this.embedArray.length) {
                         this.emit('invalid');

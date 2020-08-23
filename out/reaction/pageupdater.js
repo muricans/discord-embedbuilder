@@ -23,10 +23,27 @@ class PageUpdater extends events_1.EventEmitter {
      */
     constructor(channel, user, embedArray, options) {
         super();
+        this.options = {
+            message: '%u Please pick a page to go to.',
+            cancel: true,
+            cancelFormat: '%u Successfully canceled request',
+            singleListen: false,
+            time: 10000,
+            invalidPage: '%u Sorry, I could not find that page.',
+            success: '%u Set the page to %n',
+        };
         this.channel = channel;
         this.user = user;
         this.embedArray = embedArray;
-        this.options = options;
+        if (options) {
+            this.options.message = options.message || this.options.message;
+            this.options.cancel = options.cancel || this.options.cancel;
+            this.options.cancelFormat = options.cancelFormat || this.options.cancelFormat;
+            this.options.singleListen = options.singleListen || this.options.singleListen;
+            this.options.time = options.time || this.options.time;
+            this.options.invalidPage = options.invalidPage || this.options.invalidPage;
+            this.options.success = options.success || this.options.success;
+        }
     }
     /**
      * Awaits a page update.
@@ -35,20 +52,7 @@ class PageUpdater extends events_1.EventEmitter {
      * @emits cancel
      */
     awaitPageUpdate() {
-        const pageUpdateOptions = this.options || {
-            message: '%u Please pick a page to go to.',
-            cancel: true,
-            cancelFormat: '%u Successfully canceled request.',
-            time: 10000,
-            invalidPage: '%u Sorry, I could not find that page.',
-            success: '%u Set the page to %n',
-        };
-        const cancel = pageUpdateOptions.cancel || true;
-        const format = pageUpdateOptions.cancelFormat || '%u Successfully canceled request.';
-        const time = pageUpdateOptions.time || 10000;
-        const invalidPage = pageUpdateOptions.invalidPage || '%u Sorry, I could not find that page.';
-        const success = pageUpdateOptions.success || '%u Set the page number to %n';
-        const message = pageUpdateOptions.message || '%u Please pick a page to go to.';
+        const { message, cancel, cancelFormat, time, invalidPage, success, } = this.options;
         this.channel.send(message.replace('%u', `${this.user}`)).then(sent => {
             if (sent instanceof Array)
                 sent = sent[0];
@@ -59,7 +63,7 @@ class PageUpdater extends events_1.EventEmitter {
                 const page = parseInt(response.content);
                 if (isNaN(page) && response.content.startsWith('cancel') && cancel) {
                     this.emit('cancel', collector, response.content);
-                    response.channel.send(format.replace('%u', response.author));
+                    response.channel.send(cancelFormat.replace('%u', response.author));
                 }
                 else if (!isNaN(page)) {
                     if (page < 1 || page > this.embedArray.length) {
