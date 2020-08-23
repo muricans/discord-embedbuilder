@@ -30,13 +30,13 @@ client.on('message', async message => {
   });
   other.setTitle('Other Commands');
   help.addFields(multiFields);
-  help.addEmoji('❗', sent => {
-    sent.channel.send('wassup');
-  });
   help
     .setTitle('Commands')
+    .defaultReactions(['stop', 'back'])
     .concatEmbeds(other.embeds)
-    .build();
+    .build().then(() => {
+      help.awaitPageUpdate(message.author);
+    });
 });
 
 client.login(token);

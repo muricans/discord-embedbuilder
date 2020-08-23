@@ -7,11 +7,17 @@ npm module to make creating embeds with mutliple pages a little bit easier
 
 [latest version documentation](http://github.muricans.xyz/embedbuilder)
 
+[master documentation](http://github.muricans.xyz/embedbuilder/master)
+
 ## Quick Install
 
-discord-embedbuilder v3.0.0
+discord-embedbuilder v3.0.1 (current stable)
 
 `npm install discord-embedbuilder`
+
+discord-embedbuilder master repo (unstable)
+
+`npm install muricans/discord-embedbuilder`
 
 discord-embedbuilder uses the latest stable version of discord.js (which as of 8/21/2020 is 12.3.1)
 
@@ -125,6 +131,18 @@ Types allowed: back, first, stop, last, next
 Create an updater to await responses from a user,
 then set the builders current page to the page given.
 
+`defaultReactions(reactions)`
+
+The reactions the bot will use. If this  method is not used in the builder, the bot will automatically add all reactions.
+
+```javascript
+/*
+* This builder will only use the stop and back emojis. 
+* Using this also allows you to rearrange the order in which the bot will react with the emojis.
+*/
+embedBuilder.defaultReactions(['stop', 'back']);
+```
+
 ## Events
 [`create`](https://muricans.github.io/embedbuilder/master/classes/embedbuilder.html#create)
 
@@ -170,7 +188,7 @@ client.on('message', message => {
 });
 ```
 
-Here's an example taken from my bot [mbot](https://github.com/muricans/mbot/tree/v12-testing)
+Here's an example taken from my bot [mbot](https://github.com/muricans/mbot/)
 
 ```javascript
 module.exports = {

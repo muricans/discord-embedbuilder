@@ -46,11 +46,15 @@ export class EmbedBuilder extends EventEmitter {
     private usingPages: boolean = true;
     private collection: ReactionCollector | undefined;
     private time: number = 60000;
+
+    private enabledReactions: string[] = ['first', 'back', 'stop', 'next', 'last'];
+
     private back: string | undefined;
     private next: string | undefined;
     private stop: string | undefined;
     private first: string | undefined;
     private last: string | undefined;
+
     private usingPageNumber: boolean = true;
     private pageFormat: string = '%p/%m';
 
@@ -392,6 +396,16 @@ export class EmbedBuilder extends EventEmitter {
     }
 
     /**
+     * 
+     * @param reactions The reactions the bot will use. If this  method is not used in the builder, the bot will automatically add all reactions.
+     * Any reactions left out will not be used.
+     */
+    public defaultReactions(reactions: []) {
+        this.enabledReactions = reactions;
+        return this;
+    }
+
+    /**
      * Replaces current type of emoji given with the new emoji provided.
      * 
      * @param emoji The type of page emoji to replace. Types: back, first, stop, last, next.
@@ -454,6 +468,14 @@ export class EmbedBuilder extends EventEmitter {
             const stop = this.stop ? this.stop : '⏹';
             const last = this.last ? this.last : '⏩';
             const next = this.next ? this.next : '▶';
+            const reactions = new Map<string, boolean>();
+            const defaultReactionEmojis = ['first', 'back', 'stop', 'next', 'last']
+            if (this.enabledReactions != defaultReactionEmojis) {
+                defaultReactionEmojis.forEach(r => {
+                    if (!this.enabledReactions.find(v => v === r)) reactions.set(r, false);
+                    else reactions.set(r, true);
+                });
+            }
             if (!this.hasColor)
                 this._setColor(0x2872DB);
             let page = 0;
@@ -473,11 +495,32 @@ export class EmbedBuilder extends EventEmitter {
                     throw new Error('Author was not a user!');
                 // Embed has multiple pages, set up emoji buttons
                 if (this.usingPages && this.embeds.length > 1) {
-                    await sent.react(back);
-                    await sent.react(first);
-                    await sent.react(stop);
-                    await sent.react(last);
-                    await sent.react(next);
+                    reactions.forEach(async (e, r) => {
+                        if (e) {
+                            let emojiResolvable;
+                            switch (r) {
+                                case 'first':
+                                    emojiResolvable = first;
+                                    break;
+                                case 'next':
+                                    emojiResolvable = next;
+                                    break;
+                                case 'stop':
+                                    emojiResolvable = stop;
+                                    break;
+                                case 'back':
+                                    emojiResolvable = back;
+                                    break;
+                                case 'last':
+                                    emojiResolvable = last;
+                                    break;
+                                default:
+                                    emojiResolvable = 'could not find emoji';
+                                    break;
+                            }
+                            await sent.react(emojiResolvable);
+                        }
+                    });
                 }
                 // React with custom emojis, if any were given.
                 if (this.emojis.length) {

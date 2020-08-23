@@ -38,6 +38,7 @@ class EmbedBuilder extends events_1.EventEmitter {
         this.emojis = [];
         this.usingPages = true;
         this.time = 60000;
+        this.enabledReactions = ['first', 'back', 'stop', 'next', 'last'];
         this.usingPageNumber = true;
         this.pageFormat = '%p/%m';
         this.channel = channel;
@@ -332,6 +333,15 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
+     *
+     * @param reactions The reactions the bot will use. If this  method is not used in the builder, the bot will automatically add all reactions.
+     * Any reactions left out will not be used.
+     */
+    defaultReactions(reactions) {
+        this.enabledReactions = reactions;
+        return this;
+    }
+    /**
      * Replaces current type of emoji given with the new emoji provided.
      *
      * @param emoji The type of page emoji to replace. Types: back, first, stop, last, next.
@@ -394,6 +404,16 @@ class EmbedBuilder extends events_1.EventEmitter {
             const stop = this.stop ? this.stop : '⏹';
             const last = this.last ? this.last : '⏩';
             const next = this.next ? this.next : '▶';
+            const reactions = new Map();
+            const defaultReactionEmojis = ['first', 'back', 'stop', 'next', 'last'];
+            if (this.enabledReactions != defaultReactionEmojis) {
+                defaultReactionEmojis.forEach(r => {
+                    if (!this.enabledReactions.find(v => v === r))
+                        reactions.set(r, false);
+                    else
+                        reactions.set(r, true);
+                });
+            }
             if (!this.hasColor)
                 this._setColor(0x2872DB);
             let page = 0;
@@ -413,11 +433,32 @@ class EmbedBuilder extends events_1.EventEmitter {
                     throw new Error('Author was not a user!');
                 // Embed has multiple pages, set up emoji buttons
                 if (this.usingPages && this.embeds.length > 1) {
-                    yield sent.react(back);
-                    yield sent.react(first);
-                    yield sent.react(stop);
-                    yield sent.react(last);
-                    yield sent.react(next);
+                    reactions.forEach((e, r) => __awaiter(this, void 0, void 0, function* () {
+                        if (e) {
+                            let emojiResolvable;
+                            switch (r) {
+                                case 'first':
+                                    emojiResolvable = first;
+                                    break;
+                                case 'next':
+                                    emojiResolvable = next;
+                                    break;
+                                case 'stop':
+                                    emojiResolvable = stop;
+                                    break;
+                                case 'back':
+                                    emojiResolvable = back;
+                                    break;
+                                case 'last':
+                                    emojiResolvable = last;
+                                    break;
+                                default:
+                                    emojiResolvable = 'could not find emoji';
+                                    break;
+                            }
+                            yield sent.react(emojiResolvable);
+                        }
+                    }));
                 }
                 // React with custom emojis, if any were given.
                 if (this.emojis.length) {

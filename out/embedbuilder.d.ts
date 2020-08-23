@@ -23,6 +23,7 @@ export declare class EmbedBuilder extends EventEmitter {
     private usingPages;
     private collection;
     private time;
+    private enabledReactions;
     private back;
     private next;
     private stop;
@@ -175,6 +176,12 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param emojis The emojis to push.
      */
     addEmojis(emojis: Emojis): this;
+    /**
+     *
+     * @param reactions The reactions the bot will use. If this  method is not used in the builder, the bot will automatically add all reactions.
+     * Any reactions left out will not be used.
+     */
+    defaultReactions(reactions: []): this;
     /**
      * Replaces current type of emoji given with the new emoji provided.
      *
