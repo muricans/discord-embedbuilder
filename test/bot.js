@@ -7,8 +7,7 @@ const {
 } = require('./settings.json');
 const client = new Client();
 const {
-  EmbedBuilder,
-  PageUpdater
+  EmbedBuilder
 } = require('../out/index');
 
 client.on('message', async message => {
@@ -30,9 +29,10 @@ client.on('message', async message => {
   });
   other.setTitle('Other Commands');
   help.addFields(multiFields);
+  help.addField("test", "test2");
   help
     .setTitle('Commands')
-    .defaultReactions(['stop', 'back'])
+    .defaultReactions([])
     .concatEmbeds(other.embeds)
     .build().then(() => {
       help.awaitPageUpdate(message.author);

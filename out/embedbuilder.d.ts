@@ -17,6 +17,9 @@ export declare class EmbedBuilder extends EventEmitter {
      * The channel being used with the EmbedBuilder.
      */
     channel: TextChannel | DMChannel;
+    /**
+     * All embeds in the builder.
+     */
     embeds: MessageEmbed[];
     private hasColor;
     private emojis;

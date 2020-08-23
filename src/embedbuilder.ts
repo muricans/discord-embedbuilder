@@ -39,6 +39,9 @@ export class EmbedBuilder extends EventEmitter {
      * The channel being used with the EmbedBuilder.
      */
     public channel: TextChannel | DMChannel;
+    /**
+     * All embeds in the builder.
+     */
     public embeds: MessageEmbed[] = [];
 
     private hasColor: boolean = false;
@@ -271,7 +274,7 @@ export class EmbedBuilder extends EventEmitter {
      */
     public addField(name: any, value: any, inline?: boolean) {
         this._all((i) => {
-            this.embeds[i].addFields(name, value, inline);
+            this.embeds[i].addField(name, value, inline);
         });
         return this;
     }
@@ -463,11 +466,13 @@ export class EmbedBuilder extends EventEmitter {
     public build(): Promise<this> {
         return new Promise((resolve, reject) => {
             if (!this.channel || !this.embeds.length) return reject(new Error('A channel, and array of embeds is required.'));
+
             const back = this.back ? this.back : '◀';
             const first = this.first ? this.first : '⏪';
             const stop = this.stop ? this.stop : '⏹';
             const last = this.last ? this.last : '⏩';
             const next = this.next ? this.next : '▶';
+
             const reactions = new Map<string, boolean>();
             const defaultReactionEmojis = ['first', 'back', 'stop', 'next', 'last']
             if (this.enabledReactions != defaultReactionEmojis) {
@@ -476,9 +481,12 @@ export class EmbedBuilder extends EventEmitter {
                     else reactions.set(r, true);
                 });
             }
+
             if (!this.hasColor)
                 this._setColor(0x2872DB);
+
             let page = 0;
+
             // Is embed using page footer
             if (this.usingPageNumber)
                 for (let i = 0; i < this.embeds.length; i++)
@@ -515,8 +523,7 @@ export class EmbedBuilder extends EventEmitter {
                                     emojiResolvable = last;
                                     break;
                                 default:
-                                    emojiResolvable = 'could not find emoji';
-                                    break;
+                                    throw new Error("Could not parse emoji");
                             }
                             await sent.react(emojiResolvable);
                         }
@@ -560,6 +567,7 @@ export class EmbedBuilder extends EventEmitter {
                                 break;
                         }
                     }
+                    // Do custom emoji action
                     for (let i = 0; i < this.emojis.length; i++) {
                         if (reaction.emoji.name === this.emojis[i].emoji)
                             return this.emojis[i].do(sent, page, this.emojis[i].emoji);

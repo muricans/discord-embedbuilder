@@ -33,6 +33,9 @@ class EmbedBuilder extends events_1.EventEmitter {
     */
     constructor(channel) {
         super();
+        /**
+         * All embeds in the builder.
+         */
         this.embeds = [];
         this.hasColor = false;
         this.emojis = [];
@@ -219,7 +222,7 @@ class EmbedBuilder extends events_1.EventEmitter {
      */
     addField(name, value, inline) {
         this._all((i) => {
-            this.embeds[i].addFields(name, value, inline);
+            this.embeds[i].addField(name, value, inline);
         });
         return this;
     }
@@ -453,8 +456,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                                     emojiResolvable = last;
                                     break;
                                 default:
-                                    emojiResolvable = 'could not find emoji';
-                                    break;
+                                    throw new Error("Could not parse emoji");
                             }
                             yield sent.react(emojiResolvable);
                         }
@@ -500,6 +502,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                                 break;
                         }
                     }
+                    // Do custom emoji action
                     for (let i = 0; i < this.emojis.length; i++) {
                         if (reaction.emoji.name === this.emojis[i].emoji)
                             return this.emojis[i].do(sent, page, this.emojis[i].emoji);
