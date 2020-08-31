@@ -11,7 +11,7 @@ npm module to make creating embeds with mutliple pages a little bit easier
 
 ## Quick Install
 
-discord-embedbuilder v3.0.1 (current stable)
+discord-embedbuilder v3.1.0 (current stable)
 
 `npm install discord-embedbuilder`
 

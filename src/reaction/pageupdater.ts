@@ -87,7 +87,7 @@ export class PageUpdater extends EventEmitter {
      * @emits invalid
      * @emits cancel
      */
-    public awaitPageUpdate() {
+    public awaitPageUpdate(): this {
         const {
             message, cancel, cancelFormat, time, invalidPage, success,
         } = this.options;
@@ -106,7 +106,7 @@ export class PageUpdater extends EventEmitter {
                         this.emit('invalid');
                         return response.channel.send(invalidPage.replace('%u', response.author));
                     }
-                    this.emit('page', page, response.content, collector);
+                    this.emit('page', page - 1, response.content, collector);
                     response.channel.send(success
                         .replace('%u', response.author)
                         .replace('%n', page.toString())
@@ -121,6 +121,7 @@ export class PageUpdater extends EventEmitter {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace PageUpdater {
     /**
      * Emitted when it has received a valid number.

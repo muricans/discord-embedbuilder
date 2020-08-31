@@ -9,3 +9,5 @@ typedoc.js
 .gitignore
 src
 .github
+.eslintrc
+.eslintignore

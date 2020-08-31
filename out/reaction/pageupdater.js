@@ -70,7 +70,7 @@ class PageUpdater extends events_1.EventEmitter {
                         this.emit('invalid');
                         return response.channel.send(invalidPage.replace('%u', response.author));
                     }
-                    this.emit('page', page, response.content, collector);
+                    this.emit('page', page - 1, response.content, collector);
                     response.channel.send(success
                         .replace('%u', response.author)
                         .replace('%n', page.toString()));
@@ -85,5 +85,6 @@ class PageUpdater extends events_1.EventEmitter {
     }
 }
 exports.PageUpdater = PageUpdater;
+// eslint-disable-next-line @typescript-eslint/no-namespace
 (function (PageUpdater) {
 })(PageUpdater = exports.PageUpdater || (exports.PageUpdater = {}));

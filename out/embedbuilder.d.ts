@@ -62,7 +62,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): void;
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this;
     /**
      *
      * @param use Use the page system for the embed.
@@ -198,7 +198,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param user The user to accept a page update from.
      * @emits pageUpdate
      */
-    awaitPageUpdate(user: User, options?: PageUpdateOptions): this | undefined;
+    awaitPageUpdate(user: User, options?: PageUpdateOptions): this;
     /**
      * Builds the embed.
      * @emits stop

@@ -72,6 +72,7 @@ class EmbedBuilder extends events_1.EventEmitter {
             if (i === (dataPerPage * multiplier) - 1)
                 multiplier++;
         }
+        return this;
     }
     /**
      *
@@ -368,7 +369,7 @@ class EmbedBuilder extends events_1.EventEmitter {
      */
     awaitPageUpdate(user, options) {
         if (!this.channel)
-            return;
+            return this;
         const update = new pageupdater_1.PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
         update.on('page', (page, a, c) => {
             this.emit('pageUpdate', page);
@@ -407,14 +408,13 @@ class EmbedBuilder extends events_1.EventEmitter {
             }
             if (!this.hasColor)
                 this._setColor(0x2872DB);
-            let page = 0;
             // Is embed using page footer
             if (this.usingPageNumber)
                 for (let i = 0; i < this.embeds.length; i++)
                     this.embeds[i].setFooter(this.pageFormat
                         .replace('%p', (i + 1).toString())
                         .replace('%m', this.embeds.length.toString()));
-            this.channel.send(this.embeds[page]).then((sent) => __awaiter(this, void 0, void 0, function* () {
+            this.channel.send(this.embeds[0]).then((sent) => __awaiter(this, void 0, void 0, function* () {
                 if (sent instanceof Array)
                     return reject(new Error('Got multiple messages instead of one.'));
                 let author;
@@ -459,6 +459,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                 // Finished sending first page + reactions, emit create event.
                 this.emit('create', sent, sent.reactions);
                 // Set up collection event.
+                let page = 0;
                 const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
                     time: this.time,
                 }).on('end', () => {
@@ -490,22 +491,19 @@ class EmbedBuilder extends events_1.EventEmitter {
                                 page = this.embeds.length - 1;
                                 break;
                         }
+                        this.emit('pageUpdate', page);
                     }
                     // Do custom emoji action
                     for (let i = 0; i < this.emojis.length; i++) {
                         if (reaction.emoji.name === this.emojis[i].emoji)
                             return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                     }
-                    sent.edit(this.embeds[page]);
                 });
                 this.on('pageUpdate', (newPage) => {
-                    newPage = newPage - 1;
                     if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
-                    else {
-                        page = newPage;
+                    else
                         sent.edit(this.embeds[newPage]);
-                    }
                 });
                 this.collection = collection;
                 return resolve(this);
@@ -514,5 +512,6 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
 }
 exports.EmbedBuilder = EmbedBuilder;
+// eslint-disable-next-line @typescript-eslint/no-namespace
 (function (EmbedBuilder) {
 })(EmbedBuilder = exports.EmbedBuilder || (exports.EmbedBuilder = {}));

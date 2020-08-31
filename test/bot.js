@@ -1,6 +1,6 @@
+/* eslint-disable */
 const {
-  Client,
-  MessageEmbed,
+  Client
 } = require('discord.js');
 const {
   token
@@ -32,14 +32,9 @@ client.on('message', async message => {
   help.addField("test", "test2");
   help
     .setTitle('Commands')
-    .defaultReactions([])
     .concatEmbeds(other.embeds)
-    .spliceFields(3, 1)
     .build().then(() => {
-      help.awaitPageUpdate(message.author, {
-        success: '%u I set it to %n',
-        singleListen: false,
-      });
+      help.awaitPageUpdate(message.author);
     });
 });
 

@@ -44,13 +44,13 @@ export class EmbedBuilder extends EventEmitter {
      */
     public embeds: MessageEmbed[] = [];
 
-    private hasColor: boolean = false;
+    private hasColor = false;
     private emojis: Emoji[] = [];
-    private usingPages: boolean = true;
+    private usingPages = true;
     private collection: ReactionCollector | undefined;
-    private time: number = 60000;
+    private time = 60000;
 
-    private enabledReactions: string[] = ['first', 'back', 'stop', 'next', 'last'];
+    private enabledReactions = ['first', 'back', 'stop', 'next', 'last'];
 
     private back: string | undefined;
     private next: string | undefined;
@@ -58,8 +58,8 @@ export class EmbedBuilder extends EventEmitter {
     private first: string | undefined;
     private last: string | undefined;
 
-    private usingPageNumber: boolean = true;
-    private pageFormat: string = '%p/%m';
+    private usingPageNumber = true;
+    private pageFormat = '%p/%m';
 
     /**
     * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
@@ -93,7 +93,7 @@ export class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void) {
+    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this {
         let multiplier = 1;
         for (let i = 0; i < dataPerPage * multiplier; i++) {
             if (i === data) {
@@ -105,13 +105,14 @@ export class EmbedBuilder extends EventEmitter {
             if (i === (dataPerPage * multiplier) - 1)
                 multiplier++;
         }
+        return this;
     }
 
     /**
      * 
      * @param use Use the page system for the embed.
      */
-    public usePages(use: boolean) {
+    public usePages(use: boolean): this {
         this.usingPages = use;
         return this;
     }
@@ -123,7 +124,7 @@ export class EmbedBuilder extends EventEmitter {
      * @param page The page to update the embed to.
      * @emits pageUpdate
      */
-    public updatePage(page: number) {
+    public updatePage(page: number): this {
         this.emit('pageUpdate', page);
         return this;
     }
@@ -138,7 +139,7 @@ export class EmbedBuilder extends EventEmitter {
      * // -> Page (1/3)
      * ```
      */
-    public setPageFormat(format: string) {
+    public setPageFormat(format: string): this {
         this.pageFormat = format;
         return this;
     }
@@ -148,7 +149,7 @@ export class EmbedBuilder extends EventEmitter {
      * 
      * @param channel The channel to switch the current one to.
      */
-    public changeChannel(channel: TextChannel | DMChannel) {
+    public changeChannel(channel: TextChannel | DMChannel): this {
         this.channel = channel;
         return this;
     }
@@ -158,7 +159,7 @@ export class EmbedBuilder extends EventEmitter {
      * 
      * @param embeds The embeds given here will be put at the end of the current embed array.
      */
-    public concatEmbeds(embeds: MessageEmbed[]) {
+    public concatEmbeds(embeds: MessageEmbed[]): this {
         this.embeds = this.embeds.concat(embeds);
         return this;
     }
@@ -167,7 +168,7 @@ export class EmbedBuilder extends EventEmitter {
      * 
      * @param embeds The array of embeds to use.
      */
-    public setEmbeds(embeds: MessageEmbed[]) {
+    public setEmbeds(embeds: MessageEmbed[]): this {
         this.embeds = embeds;
         return this;
     }
@@ -176,7 +177,7 @@ export class EmbedBuilder extends EventEmitter {
      * 
      * @param time The amount of time the bot will allow reactions for.
      */
-    public setTime(time: number) {
+    public setTime(time: number): this {
         this.time = time;
         return this;
     }
@@ -185,7 +186,7 @@ export class EmbedBuilder extends EventEmitter {
      * 
      * @param embed The embed to push to the array of embeds.
      */
-    public addEmbed(embed: MessageEmbed) {
+    public addEmbed(embed: MessageEmbed): this {
         this.embeds.push(embed);
         return this;
     }
@@ -194,47 +195,47 @@ export class EmbedBuilder extends EventEmitter {
      * @returns {MessageEmbed[]} The current embeds that this builder has.
      * @deprecated Use [[EmbedBuilder.embeds]] instead.
      */
-    public getEmbeds() {
+    public getEmbeds(): MessageEmbed[] {
         process.emitWarning('#getEmbeds() is deprecated. Use #embeds instead.', 'DeprecationWarning');
         return this.embeds;
     }
 
-    public setTitle(title: string) {
+    public setTitle(title: string): this {
         this._all((i) => {
             this.embeds[i].setTitle(title);
         });
         return this;
     }
 
-    public setFooter(text: any, icon?: string) {
+    public setFooter(text: any, icon?: string): this {
         this._all((i) => {
             this.embeds[i].setFooter(text, icon);
         });
         return this;
     }
 
-    public setDescription(description: any) {
+    public setDescription(description: any): this {
         this._all(i => {
             this.embeds[i].setDescription(description);
         });
         return this;
     }
 
-    public setImage(url: string) {
+    public setImage(url: string): this {
         this._all(i => {
             this.embeds[i].setImage(url);
         });
         return this;
     }
 
-    public setThumbnail(url: string) {
+    public setThumbnail(url: string): this {
         this._all(i => {
             this.embeds[i].setThumbnail(url);
         });
         return this;
     }
 
-    public spliceFields(index: number, deleteCount: number, fields?: EmbedFieldData[]) {
+    public spliceFields(index: number, deleteCount: number, fields?: EmbedFieldData[]): this {
         this._all(i => {
             if (!fields)
                 this.embeds[i].spliceFields(index, deleteCount);
@@ -244,7 +245,7 @@ export class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public attachFiles(file: (string | MessageAttachment | FileOptions)[]) {
+    public attachFiles(file: (string | MessageAttachment | FileOptions)[]): this {
         this._all(i => {
             this.embeds[i].attachFiles(file);
         });
@@ -257,7 +258,7 @@ export class EmbedBuilder extends EventEmitter {
      * @param value Value of the field
      * @param inline Inline?
      */
-    public addField(name: any, value: any, inline?: boolean) {
+    public addField(name: any, value: any, inline?: boolean): this {
         this._all((i) => {
             this.embeds[i].addField(name, value, inline);
         });
@@ -268,28 +269,28 @@ export class EmbedBuilder extends EventEmitter {
      * Adds multiple fields to all embeds.
      * @param fields An array of EmbedFieldData
      */
-    public addFields(fields: EmbedFieldData[]) {
+    public addFields(fields: EmbedFieldData[]): this {
         this._all((i) => {
             this.embeds[i].addFields(fields);
         });
         return this;
     }
 
-    public setURL(url: string) {
+    public setURL(url: string): this {
         this._all((i) => {
             this.embeds[i].setURL(url);
         });
         return this;
     }
 
-    public setAuthor(name: any, icon?: string, url?: string) {
+    public setAuthor(name: any, icon?: string, url?: string): this {
         this._all((i) => {
             this.embeds[i].setAuthor(name, icon, url);
         });
         return this;
     }
 
-    public setTimestamp(timestamp?: Date | number) {
+    public setTimestamp(timestamp?: Date | number): this {
         this._all((i) => {
             this.embeds[i].setTimestamp(timestamp);
         });
@@ -307,7 +308,7 @@ export class EmbedBuilder extends EventEmitter {
     /**
      * Add an emoji which will perform it's own action when pressed.
      */
-    public addEmoji(unicodeEmoji: string, func: (sent: Message, page: number, emoji: string) => void) {
+    public addEmoji(unicodeEmoji: string, func: (sent: Message, page: number, emoji: string) => void): this {
         this.emojis.push({
             emoji: unicodeEmoji,
             do: func,
@@ -318,14 +319,14 @@ export class EmbedBuilder extends EventEmitter {
     /**
      * Deletes an emoji from the emoji list
      */
-    public deleteEmoji(unicodeEmoji: string) {
+    public deleteEmoji(unicodeEmoji: string): this {
         const index = this.emojis.find(emoji => emoji.emoji === unicodeEmoji);
         if (!index) throw new Error('Emoji was undefined');
         this.emojis.splice(this.emojis.indexOf(index), 1);
         return this;
     }
 
-    public setColor(color: ColorResolvable) {
+    public setColor(color: ColorResolvable): this {
         this._all((i) => {
             this.embeds[i].setColor(color);
         });
@@ -336,7 +337,7 @@ export class EmbedBuilder extends EventEmitter {
     /**
      * @ignore
      */
-    private _setColor(color: ColorResolvable) {
+    private _setColor(color: ColorResolvable): this {
         this._all((i) => {
             this.embeds[i].setColor(color);
         });
@@ -347,7 +348,7 @@ export class EmbedBuilder extends EventEmitter {
      * Cancels the EmbedBuilder
      * @emits stop
      */
-    public cancel(callback?: () => void) {
+    public cancel(callback?: () => void): this {
         if (this.collection) {
             this.collection.stop();
             if (callback)
@@ -357,7 +358,7 @@ export class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public showPageNumber(use: boolean) {
+    public showPageNumber(use: boolean): this {
         this.usingPageNumber = use;
         return this;
     }
@@ -375,7 +376,7 @@ export class EmbedBuilder extends EventEmitter {
      * 
      * @param emojis The emojis to push.
      */
-    public addEmojis(emojis: Emojis) {
+    public addEmojis(emojis: Emojis): this {
         const keys = Object.keys(emojis);
         const values = Object.values(emojis);
         for (let i = 0; i < keys.length; i++)
@@ -388,7 +389,7 @@ export class EmbedBuilder extends EventEmitter {
      * @param reactions The reactions the bot will use. If this  method is not used in the builder, the bot will automatically add all reactions.
      * Any reactions left out will not be used.
      */
-    public defaultReactions(reactions: []) {
+    public defaultReactions(reactions: []): this {
         this.enabledReactions = reactions;
         return this;
     }
@@ -399,7 +400,7 @@ export class EmbedBuilder extends EventEmitter {
      * @param emoji The type of page emoji to replace. Types: back, first, stop, last, next.
      * @param newEmoji This emoji will replace the current page emoji for the given type.
      */
-    public setPageEmoji(emoji: string, newEmoji: string) {
+    public setPageEmoji(emoji: string, newEmoji: string): this {
         switch (emoji) {
             case "back":
                 this.back = newEmoji;
@@ -429,8 +430,8 @@ export class EmbedBuilder extends EventEmitter {
      * @param user The user to accept a page update from.
      * @emits pageUpdate
      */
-    awaitPageUpdate(user: User, options?: PageUpdateOptions) {
-        if (!this.channel) return;
+    awaitPageUpdate(user: User, options?: PageUpdateOptions): this {
+        if (!this.channel) return this;
         const update = new PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
         update.on('page', (page, a, c) => {
             this.emit('pageUpdate', page);
@@ -470,9 +471,6 @@ export class EmbedBuilder extends EventEmitter {
 
             if (!this.hasColor)
                 this._setColor(0x2872DB);
-
-            let page = 0;
-
             // Is embed using page footer
             if (this.usingPageNumber)
                 for (let i = 0; i < this.embeds.length; i++)
@@ -480,7 +478,7 @@ export class EmbedBuilder extends EventEmitter {
                         .replace('%p', (i + 1).toString())
                         .replace('%m', this.embeds.length.toString())
                     );
-            this.channel.send(this.embeds[page]).then(async sent => {
+            this.channel.send(this.embeds[0]).then(async sent => {
                 if (sent instanceof Array) return reject(new Error('Got multiple messages instead of one.'));
                 let author: User;
                 if (sent.author)
@@ -524,6 +522,7 @@ export class EmbedBuilder extends EventEmitter {
                 // Finished sending first page + reactions, emit create event.
                 this.emit('create', sent, sent.reactions);
                 // Set up collection event.
+                let page = 0;
                 const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
                     time: this.time,
                 }).on('end', () => {
@@ -553,23 +552,19 @@ export class EmbedBuilder extends EventEmitter {
                                 page = this.embeds.length - 1;
                                 break;
                         }
+                        this.emit('pageUpdate', page);
                     }
                     // Do custom emoji action
                     for (let i = 0; i < this.emojis.length; i++) {
                         if (reaction.emoji.name === this.emojis[i].emoji)
                             return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                     }
-                    sent.edit(this.embeds[page]);
                 });
                 this.on('pageUpdate', (newPage) => {
-                    newPage = newPage - 1;
                     if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
-                    else {
-                        page = newPage;
+                    else
                         sent.edit(this.embeds[newPage]);
-                    }
-
                 });
                 this.collection = collection;
                 return resolve(this);
@@ -578,6 +573,7 @@ export class EmbedBuilder extends EventEmitter {
     }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-namespace
 export namespace EmbedBuilder {
     /**
      * Emitted when the builder has stopped.
