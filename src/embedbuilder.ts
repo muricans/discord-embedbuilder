@@ -556,7 +556,7 @@ export class EmbedBuilder extends EventEmitter {
                     }
                     // Do custom emoji action
                     for (let i = 0; i < this.emojis.length; i++) {
-                        if (reaction.emoji.name === this.emojis[i].emoji)
+                        if (reaction.emoji.name === this.emojis[i].emoji || reaction.emoji.id === this.emojis[i].emoji)
                             return this.emojis[i].do(sent, page, this.emojis[i].emoji);
                     }
                 });
