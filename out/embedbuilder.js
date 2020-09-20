@@ -61,16 +61,18 @@ class EmbedBuilder extends events_1.EventEmitter {
      * @param insert Gives you an embed and the current index.
      */
     calculatePages(data, dataPerPage, insert) {
-        let multiplier = 1;
-        for (let i = 0; i < dataPerPage * multiplier; i++) {
-            if (i === data) {
+        let page = 1;
+        for (let i = 0; i < dataPerPage * page; i++) {
+            // count equals data amount, break loop
+            if (i === data)
                 break;
-            }
-            if (!this.embeds[multiplier - 1])
+            // check if an embed doesn't exist for page
+            if (!this.embeds[page - 1])
                 this.embeds.push(new discord_js_1.MessageEmbed());
-            insert(this.embeds[multiplier - 1], i);
-            if (i === (dataPerPage * multiplier) - 1)
-                multiplier++;
+            insert(this.embeds[page - 1], i);
+            // reached maximum amount per page, create new page
+            if (i === (dataPerPage * page) - 1)
+                page++;
         }
         return this;
     }
@@ -410,9 +412,9 @@ class EmbedBuilder extends events_1.EventEmitter {
                 this._setColor(0x2872DB);
             // Is embed using page footer
             if (this.usingPageNumber)
-                for (let i = 0; i < this.embeds.length; i++)
-                    this.embeds[i].setFooter(this.pageFormat
-                        .replace('%p', (i + 1).toString())
+                for (const embed of this.embeds)
+                    embed.setFooter(this.pageFormat
+                        .replace('%p', (this.embeds.indexOf(embed) + 1).toString())
                         .replace('%m', this.embeds.length.toString()));
             this.channel.send(this.embeds[0]).then((sent) => __awaiter(this, void 0, void 0, function* () {
                 if (sent instanceof Array)
@@ -444,7 +446,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                                     emojiResolvable = last;
                                     break;
                                 default:
-                                    throw new Error("Could not parse emoji");
+                                    return reject(new Error("Could not parse emoji"));
                             }
                             yield sent.react(emojiResolvable);
                         }
@@ -452,9 +454,8 @@ class EmbedBuilder extends events_1.EventEmitter {
                 }
                 // React with custom emojis, if any were given.
                 if (this.emojis.length) {
-                    for (let i = 0; i < this.emojis.length; i++) {
-                        yield sent.react(this.emojis[i].emoji);
-                    }
+                    for (const emoji of this.emojis)
+                        yield sent.react(emoji.emoji);
                 }
                 // Finished sending first page + reactions, emit create event.
                 this.emit('create', sent, sent.reactions);
@@ -494,9 +495,10 @@ class EmbedBuilder extends events_1.EventEmitter {
                         this.emit('pageUpdate', page);
                     }
                     // Do custom emoji action
-                    for (let i = 0; i < this.emojis.length; i++) {
-                        if (reaction.emoji.name === this.emojis[i].emoji || reaction.emoji.id === this.emojis[i].emoji)
-                            return this.emojis[i].do(sent, page, this.emojis[i].emoji);
+                    if (this.emojis.length > 0) {
+                        const customEmoji = this.emojis.find(e => e.emoji === reaction.emoji.name || e.emoji === reaction.emoji.id);
+                        if (customEmoji)
+                            customEmoji.do(sent, page, customEmoji.emoji);
                     }
                 });
                 this.on('pageUpdate', (newPage) => {

@@ -74,7 +74,7 @@ export class EmbedBuilder extends EventEmitter {
     * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
     * ```
     */
-    constructor(channel: TextChannel | DMChannel) {
+    public constructor(channel: TextChannel | DMChannel) {
         super();
         this.channel = channel;
     }
@@ -93,17 +93,19 @@ export class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this {
-        let multiplier = 1;
-        for (let i = 0; i < dataPerPage * multiplier; i++) {
-            if (i === data) {
+    public calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this {
+        let page = 1;
+        for (let i = 0; i < dataPerPage * page; i++) {
+            // count equals data amount, break loop
+            if (i === data)
                 break;
-            }
-            if (!this.embeds[multiplier - 1])
+            // check if an embed doesn't exist for page
+            if (!this.embeds[page - 1])
                 this.embeds.push(new MessageEmbed());
-            insert(this.embeds[multiplier - 1], i);
-            if (i === (dataPerPage * multiplier) - 1)
-                multiplier++;
+            insert(this.embeds[page - 1], i);
+            // reached maximum amount per page, create new page
+            if (i === (dataPerPage * page) - 1)
+                page++;
         }
         return this;
     }
@@ -473,9 +475,9 @@ export class EmbedBuilder extends EventEmitter {
                 this._setColor(0x2872DB);
             // Is embed using page footer
             if (this.usingPageNumber)
-                for (let i = 0; i < this.embeds.length; i++)
-                    this.embeds[i].setFooter(this.pageFormat
-                        .replace('%p', (i + 1).toString())
+                for (const embed of this.embeds)
+                    embed.setFooter(this.pageFormat
+                        .replace('%p', (this.embeds.indexOf(embed) + 1).toString())
                         .replace('%m', this.embeds.length.toString())
                     );
             this.channel.send(this.embeds[0]).then(async sent => {
@@ -507,7 +509,7 @@ export class EmbedBuilder extends EventEmitter {
                                     emojiResolvable = last;
                                     break;
                                 default:
-                                    throw new Error("Could not parse emoji");
+                                    return reject(new Error("Could not parse emoji"));
                             }
                             await sent.react(emojiResolvable);
                         }
@@ -515,9 +517,8 @@ export class EmbedBuilder extends EventEmitter {
                 }
                 // React with custom emojis, if any were given.
                 if (this.emojis.length) {
-                    for (let i = 0; i < this.emojis.length; i++) {
-                        await sent.react(this.emojis[i].emoji);
-                    }
+                    for (const emoji of this.emojis)
+                        await sent.react(emoji.emoji);
                 }
                 // Finished sending first page + reactions, emit create event.
                 this.emit('create', sent, sent.reactions);
@@ -555,9 +556,10 @@ export class EmbedBuilder extends EventEmitter {
                         this.emit('pageUpdate', page);
                     }
                     // Do custom emoji action
-                    for (let i = 0; i < this.emojis.length; i++) {
-                        if (reaction.emoji.name === this.emojis[i].emoji || reaction.emoji.id === this.emojis[i].emoji)
-                            return this.emojis[i].do(sent, page, this.emojis[i].emoji);
+                    if (this.emojis.length > 0) {
+                        const customEmoji = this.emojis.find(e => e.emoji === reaction.emoji.name || e.emoji === reaction.emoji.id);
+                        if (customEmoji)
+                            customEmoji.do(sent, page, customEmoji.emoji);
                     }
                 });
                 this.on('pageUpdate', (newPage) => {

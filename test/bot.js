@@ -30,6 +30,9 @@ client.on('message', async message => {
   other.setTitle('Other Commands');
   help.addFields(multiFields);
   help.addField("test", "test2");
+  help.addEmoji('757146517978087444', (sent) => {
+    sent.channel.send('yep');
+  });
   help
     .setTitle('Commands')
     .concatEmbeds(other.embeds)
