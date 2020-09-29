@@ -36,6 +36,10 @@ client.on('message', async message => {
   help
     .setTitle('Commands')
     .concatEmbeds(other.embeds)
+    .setTime(5000)
+    .on('pageUpdate', () => {
+      help.updateTime(5000);
+    })
     .build().then(() => {
       help.awaitPageUpdate(message.author);
     });

@@ -137,10 +137,26 @@ class EmbedBuilder extends events_1.EventEmitter {
     }
     /**
      *
-     * @param time The amount of time the bot will allow reactions for.
+     * @param time The amount of time the bot will allow reactions for. (ms)
      */
     setTime(time) {
         this.time = time;
+        return this;
+    }
+    /**
+     * Use after embed has already been built to add time to the current collector.
+     * @param time Time to add to current amount of time. (ms)
+     */
+    addTime(time) {
+        if (this.date) {
+            this.time += time;
+            const currentTime = (this.time + this.date) - Date.now();
+            //console.log(currentTime, this.time);
+            if (this.timer && currentTime > 0 && this.stopFunc !== undefined && this.date) {
+                clearTimeout(this.timer);
+                this.timer = setTimeout(this.stopFunc, currentTime);
+            }
+        }
         return this;
     }
     /**
@@ -461,9 +477,8 @@ class EmbedBuilder extends events_1.EventEmitter {
                 this.emit('create', sent, sent.reactions);
                 // Set up collection event.
                 let page = 0;
-                const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
-                    time: this.time,
-                }).on('end', () => {
+                const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id)
+                    .on('end', () => {
                     if (!this.hasColor)
                         sent.edit(this.embeds[page].setColor(0xE21717));
                     this.emit('stop', sent, page, collection);
@@ -482,6 +497,10 @@ class EmbedBuilder extends events_1.EventEmitter {
                                 break;
                             case stop:
                                 collection.stop();
+                                if (this.timer) {
+                                    clearTimeout(this.timer);
+                                    this.timer = undefined;
+                                }
                                 break;
                             case next:
                                 if (page === this.embeds.length - 1)
@@ -508,6 +527,14 @@ class EmbedBuilder extends events_1.EventEmitter {
                         sent.edit(this.embeds[newPage]);
                 });
                 this.collection = collection;
+                this.stopFunc = () => {
+                    var _a;
+                    //console.log('over');
+                    (_a = this.collection) === null || _a === void 0 ? void 0 : _a.stop();
+                    this.emit('stop', sent, page, collection);
+                };
+                this.date = Date.now();
+                this.timer = setTimeout(this.stopFunc, this.time);
                 return resolve(this);
             }));
         });

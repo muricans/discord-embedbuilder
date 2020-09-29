@@ -48,7 +48,11 @@ export class EmbedBuilder extends EventEmitter {
     private emojis: Emoji[] = [];
     private usingPages = true;
     private collection: ReactionCollector | undefined;
+
     private time = 60000;
+    private timer?: NodeJS.Timeout;
+    private date?: number;
+    private stopFunc?: () => void;
 
     private enabledReactions = ['first', 'back', 'stop', 'next', 'last'];
 
@@ -177,10 +181,27 @@ export class EmbedBuilder extends EventEmitter {
 
     /**
      * 
-     * @param time The amount of time the bot will allow reactions for.
+     * @param time The amount of time the bot will allow reactions for. (ms)
      */
     public setTime(time: number): this {
         this.time = time;
+        return this;
+    }
+
+    /**
+     * Use after embed has already been built to add time to the current collector.
+     * @param time Time to add to current amount of time. (ms)
+     */
+    public addTime(time: number): this {
+        if (this.date) {
+            this.time += time;
+            const currentTime = (this.time + this.date) - Date.now();
+            //console.log(currentTime, this.time);
+            if (this.timer && currentTime > 0 && this.stopFunc !== undefined && this.date) {
+                clearTimeout(this.timer);
+                this.timer = setTimeout(this.stopFunc, currentTime);
+            }
+        }
         return this;
     }
 
@@ -524,13 +545,12 @@ export class EmbedBuilder extends EventEmitter {
                 this.emit('create', sent, sent.reactions);
                 // Set up collection event.
                 let page = 0;
-                const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id, {
-                    time: this.time,
-                }).on('end', () => {
-                    if (!this.hasColor)
-                        sent.edit(this.embeds[page].setColor(0xE21717));
-                    this.emit('stop', sent, page, collection);
-                });
+                const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id)
+                    .on('end', () => {
+                        if (!this.hasColor)
+                            sent.edit(this.embeds[page].setColor(0xE21717));
+                        this.emit('stop', sent, page, collection);
+                    });
                 collection.on('collect', (reaction, user) => {
                     reaction.users.remove(user);
                     if (this.usingPages && this.embeds.length > 1) {
@@ -544,6 +564,10 @@ export class EmbedBuilder extends EventEmitter {
                                 break;
                             case stop:
                                 collection.stop();
+                                if (this.timer) {
+                                    clearTimeout(this.timer);
+                                    this.timer = undefined;
+                                }
                                 break;
                             case next:
                                 if (page === this.embeds.length - 1) return;
@@ -569,6 +593,13 @@ export class EmbedBuilder extends EventEmitter {
                         sent.edit(this.embeds[newPage]);
                 });
                 this.collection = collection;
+                this.stopFunc = () => {
+                    //console.log('over');
+                    this.collection?.stop();
+                    this.emit('stop', sent, page, collection);
+                };
+                this.date = Date.now();
+                this.timer = setTimeout(this.stopFunc, this.time);
                 return resolve(this);
             });
         });

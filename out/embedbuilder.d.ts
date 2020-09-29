@@ -26,6 +26,9 @@ export declare class EmbedBuilder extends EventEmitter {
     private usingPages;
     private collection;
     private time;
+    private timer?;
+    private date?;
+    private stopFunc?;
     private enabledReactions;
     private back;
     private next;
@@ -106,9 +109,14 @@ export declare class EmbedBuilder extends EventEmitter {
     setEmbeds(embeds: MessageEmbed[]): this;
     /**
      *
-     * @param time The amount of time the bot will allow reactions for.
+     * @param time The amount of time the bot will allow reactions for. (ms)
      */
     setTime(time: number): this;
+    /**
+     * Use after embed has already been built to add time to the current collector.
+     * @param time Time to add to current amount of time. (ms)
+     */
+    addTime(time: number): this;
     /**
      *
      * @param embed The embed to push to the array of embeds.

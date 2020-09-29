@@ -5,3 +5,4 @@ tsconfig.json
 docs
 typedoc.js
 test/settings.json
+stable.bat

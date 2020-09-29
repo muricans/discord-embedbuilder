@@ -15,7 +15,7 @@ discord-embedbuilder v3.2.1 (current stable)
 
 `npm install discord-embedbuilder`
 
-discord-embedbuilder master repo (latest features & fixes)
+discord-embedbuilder master (v3.3.0) (latest features & fixes)
 
 `npm install muricans/discord-embedbuilder`
 
@@ -49,6 +49,10 @@ Puts the array of embeds given at the end of the current embeds array.
 `setTime(time)`
 
 This will set how long the builder should listen for emotes. Make sure to set your time as milliseconds.
+
+`addTime(time)`
+
+Use after the embed has been built. Will increase the amount of time the collector is active before it stops.
 
 `getEmbeds()`
 
@@ -126,7 +130,7 @@ Types allowed: back, first, stop, last, next
 
 `awaitPageUpdate(user, options)`
 
-[options](https://muricans.github.io/embedbuilder/master/interfaces/pageupdateoptions.html)
+[options](http://github.muricans.xyz/embedbuilder/master/interfaces/pageupdateoptions.html)
 
 Create an updater to await responses from a user,
 then set the builders current page to the page given.
@@ -144,19 +148,19 @@ embedBuilder.defaultReactions(['stop', 'back']);
 ```
 
 ## Events
-[`create`](https://muricans.github.io/embedbuilder/master/classes/embedbuilder.html#create)
+[`create`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#create)
 
 Emitted from build() when the first page has finished building.
 
-[`stop`](https://muricans.github.io/embedbuilder/master/classes/embedbuilder.html#stop)
+[`stop`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#stop)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-[`pageUpdate`](https://muricans.github.io/embedbuilder/master/classes/embedbuilder.html#pageUpdate)
+[`pageUpdate`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#pageUpdate)
 
 Emitted from updatePage(). Sets the new page for the bot.
 
-PageUpdater documentation can be found [here](https://muricans.github.io/embedbuilder/master/classes/pageupdater.html).
+PageUpdater documentation can be found [here](http://github.muricans.xyz/embedbuilder/master/classes/pageupdater.html).
 
 ## Example
 First import discord-embedbuilder into your project.
