@@ -54,6 +54,18 @@ This will set how long the builder should listen for emotes. Make sure to set yo
 
 Use after the embed has been built. Will increase the amount of time the collector is active before it stops.
 
+`resetTimer(time?)`
+
+Resets the timer to either the time already set, or a new time given.
+
+`addTimeOnPage(time)`
+
+Whenever the builder changes it's page, it will add specified amount of time (ms) to the current running timer.
+
+`resetTimerOnPage()`
+
+Whenever the builder changes it's page, it will reset the timer to the current set time.
+
 `getEmbeds()`
 
 Returns the current embeds that the builder has.
@@ -195,37 +207,35 @@ client.on('message', message => {
 Here's an example taken from my bot [mbot](https://github.com/muricans/mbot/)
 
 ```javascript
+const rolebot = require('../rolebot');
+const fs = require('fs');
+const {
+    EmbedBuilder,
+} = require('discord-embedbuilder');
+
 module.exports = {
-    name: 'leaderboard',
-    description: 'Get up to 50 users with the most points',
-    async execute(message, args, client) {
-        const leaders = await leaderboard(message.channel, client);
-        leaders.build();
+    name: 'list',
+    description: 'Refreshes and lists all currently active role react messages.',
+    permissions: ['MANAGE_GUILD'],
+    async execute(message) {
+        rolebot.refreshActiveMessagesFor(message.guild.id);
+        const messages = JSON.parse(fs.readFileSync('./messages.json', 'utf-8'));
+        const list = messages.ids.filter(v => v.guildId === message.guild.id);
+        if (list.length > 0) {
+            const builder = new EmbedBuilder(message.channel);
+            const guild = await message.guild.fetch();
+            builder.calculatePages(list.length, 8, async (embed, i) => {
+                    const channelName = guild.channels.cache.get(list[i].channelId);
+                    const roleName = guild.roles.cache.get(list[i].roleId);
+                    embed.addField("Message ID", list[i].messageId, true);
+                    embed.addField("Channel", `${channelName}`, true);
+                    embed.addField("Role", `${roleName}`, true);
+                })
+                .setTitle("List of All Active Messages")
+                .build();
+        } else {
+            message.channel.send(`${message.author} No messages are currently registered in this guild!`);
+        }
     },
 };
-
-function leaderboard(channel, client) {
-    return new Promise(async (resolve) => {
-        const embeds = new EmbedBuilder();
-        const users = [];
-        for (let i = 0; i < tools.users(client).length; i++) {
-            const user = tools.users(client)[i];
-            const points = await tools.getPoints(user.id);
-            users.push({
-                id: user.id,
-                username: user.username,
-                points: points,
-            });
-        }
-        users.sort((a, b) => (a.points > b.points) ? -1 : 1);
-        embeds.calculatePages(users.length, 10, (embed, i) => {
-            embed.addField(`${i + 1}. ${users[i].username}`, users[i].points, true);
-        });
-        embeds
-            .setTitle('Points Leaderboard')
-            .setTime(2 * 60000)
-            .setChannel(channel);
-        return resolve(embeds);
-    });
-}
 ```

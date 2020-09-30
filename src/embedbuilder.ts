@@ -193,15 +193,53 @@ export class EmbedBuilder extends EventEmitter {
      * @param time Time to add to current amount of time. (ms)
      */
     public addTime(time: number): this {
+        let notReady = false;
         if (this.date) {
             this.time += time;
             const currentTime = (this.time + this.date) - Date.now();
             //console.log(currentTime, this.time);
-            if (this.timer && currentTime > 0 && this.stopFunc !== undefined && this.date) {
+            if (this.timer && currentTime > 0 && this.stopFunc !== undefined) {
                 clearTimeout(this.timer);
                 this.timer = setTimeout(this.stopFunc, currentTime);
-            }
-        }
+            } else notReady = true;
+        } else notReady = true;
+        if (notReady) throw new Error('Builder was not ready to add time! Date, timer, and stopFunc must be defined by the builder.');
+        return this;
+    }
+
+    /**
+     * Resets the timer to either the time already set, or a new time given.
+     * @param time New time to set (ms)
+     */
+    public resetTimer(time?: number): this {
+        let notReady = false;
+        if (this.timer && this.stopFunc !== undefined) {
+            clearTimeout(this.timer);
+            this.date = Date.now();
+            this.timer = setTimeout(this.stopFunc, time || this.time);
+        } else notReady = true;
+        if (notReady) throw new Error('Builder was not ready to add time! Date, timer, and stopFunc must be defined by the builder.');
+        return this;
+    }
+
+    /**
+     * Whenever the builder changes it's page, it will add specified amount of time (ms) to the current running timer.
+     * @param timeToAdd Time to add to current amount of time. (ms)
+     */
+    public addTimeOnPage(timeToAdd: number): this {
+        this.on('pageUpdate', () => {
+            this.addTime(timeToAdd);
+        });
+        return this;
+    }
+
+    /**
+     * Whenever the builder changes it's page, it will reset the timer to the current set time.
+     */
+    public resetTimerOnPage(): this {
+        this.on('pageUpdate', () => {
+            this.resetTimer();
+        });
         return this;
     }
 
@@ -549,6 +587,10 @@ export class EmbedBuilder extends EventEmitter {
                     .on('end', () => {
                         if (!this.hasColor)
                             sent.edit(this.embeds[page].setColor(0xE21717));
+                        if (this.timer) {
+                            clearTimeout(this.timer);
+                            this.timer = undefined;
+                        }
                         this.emit('stop', sent, page, collection);
                     });
                 collection.on('collect', (reaction, user) => {
@@ -564,10 +606,6 @@ export class EmbedBuilder extends EventEmitter {
                                 break;
                             case stop:
                                 collection.stop();
-                                if (this.timer) {
-                                    clearTimeout(this.timer);
-                                    this.timer = undefined;
-                                }
                                 break;
                             case next:
                                 if (page === this.embeds.length - 1) return;

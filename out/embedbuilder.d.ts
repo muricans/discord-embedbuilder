@@ -118,6 +118,20 @@ export declare class EmbedBuilder extends EventEmitter {
      */
     addTime(time: number): this;
     /**
+     * Resets the timer to either the time already set, or a new time given.
+     * @param time New time to set (ms)
+     */
+    resetTimer(time?: number): this;
+    /**
+     * Whenever the builder changes it's page, it will add specified amount of time (ms) to the current running timer.
+     * @param timeToAdd Time to add to current amount of time. (ms)
+     */
+    addTimeOnPage(timeToAdd: number): this;
+    /**
+     * Whenever the builder changes it's page, it will reset the timer to the current set time.
+     */
+    resetTimerOnPage(): this;
+    /**
      *
      * @param embed The embed to push to the array of embeds.
      */
