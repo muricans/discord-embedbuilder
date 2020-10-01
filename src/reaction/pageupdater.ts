@@ -99,21 +99,16 @@ export class PageUpdater extends EventEmitter {
             collector.on('collect', response => {
                 const page = parseInt(response.content);
                 if (isNaN(page) && response.content.startsWith('cancel') && cancel) {
-                    this.emit('cancel', collector, response.content);
-                    response.channel.send(cancelFormat.replace('%u', response.author));
+                    this.emit('cancel', collector, response.content, cancelFormat.replace('%u', response.author));
                 } else if (!isNaN(page)) {
                     if (page < 1 || page > this.embedArray.length) {
-                        this.emit('invalid');
-                        return response.channel.send(invalidPage.replace('%u', response.author));
+                        return this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author));
                     }
-                    this.emit('page', page - 1, response.content, collector);
-                    response.channel.send(success
+                    this.emit('page', page - 1, response.content, collector, success
                         .replace('%u', response.author)
-                        .replace('%n', page.toString())
-                    );
+                        .replace('%n', page.toString()));
                 } else {
-                    this.emit('invalid', collector, response.content);
-                    response.channel.send(invalidPage.replace('%u', response.author));
+                    this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author));
                 }
             });
         });
@@ -129,20 +124,23 @@ export namespace PageUpdater {
      * @param page The page number received.
      * @param content The content that contained the page number.
      * @param collector The message collector.
+     * @param message The message that has been formatted to be sent to the user.
      */
-    declare function page(page: number, content: string, collector: MessageCollector): void;
+    declare function page(page: number, content: string, collector: MessageCollector, message: string): void;
     /**
      * Emitted when it has received an invalid number or page.
      * @event invalid
      * @param collector The message collector.
      * @param content The content that had an invalid response in it.
+     * @param message The message that has been formatted to be sent to the user.
      */
-    declare function invalid(collector: MessageCollector, content: string): void;
+    declare function invalid(collector: MessageCollector, content: string, message: string): void;
     /**
      * Emitted when it has been canceled or it has ended.
      * @event cancel
      * @param collector The message collector.
      * @param content The content that contained the cancel keyword.
+     * @param message The message that has been formatted to be sent to the user.
      */
-    declare function cancel(collector: MessageCollector, content: string): void;
+    declare function cancel(collector: MessageCollector, content: string, message: string): void;
 }

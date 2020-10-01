@@ -22,6 +22,7 @@ export declare class EmbedBuilder extends EventEmitter {
      */
     embeds: MessageEmbed[];
     private hasColor;
+    private endColor;
     private emojis;
     private usingPages;
     private collection;
@@ -177,6 +178,11 @@ export declare class EmbedBuilder extends EventEmitter {
     deleteEmoji(unicodeEmoji: string): this;
     setColor(color: ColorResolvable): this;
     /**
+     * When the collection has ended, and no other custom color is being used, this will be the color the embed is set to. Default is 0xE21717
+     * @param color Any color resolvable
+     */
+    setEndColor(color: ColorResolvable): this;
+    /**
      * @ignore
      */
     private _setColor;
@@ -225,6 +231,8 @@ export declare class EmbedBuilder extends EventEmitter {
      * Builds the embed.
      * @emits stop
      * @emits create
+     * @emits pageUpdate
+     * @emits preSend
      * @listens pageUpdate
      */
     build(): Promise<this>;

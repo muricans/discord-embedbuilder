@@ -38,10 +38,16 @@ class EmbedBuilder extends events_1.EventEmitter {
          */
         this.embeds = [];
         this.hasColor = false;
+        this.endColor = 0xE21717;
         this.emojis = [];
         this.usingPages = true;
         this.time = 60000;
         this.enabledReactions = ['first', 'back', 'stop', 'next', 'last'];
+        this.back = '◀';
+        this.next = '▶';
+        this.stop = '⏹';
+        this.first = '⏪';
+        this.last = '⏩';
         this.usingPageNumber = true;
         this.pageFormat = '%p/%m';
         this.channel = channel;
@@ -338,6 +344,14 @@ class EmbedBuilder extends events_1.EventEmitter {
         return this;
     }
     /**
+     * When the collection has ended, and no other custom color is being used, this will be the color the embed is set to. Default is 0xE21717
+     * @param color Any color resolvable
+     */
+    setEndColor(color) {
+        this.endColor = color;
+        return this;
+    }
+    /**
      * @ignore
      */
     _setColor(color) {
@@ -430,15 +444,27 @@ class EmbedBuilder extends events_1.EventEmitter {
      */
     awaitPageUpdate(user, options) {
         if (!this.channel)
-            return this;
+            throw new Error('A channel is required.');
         const update = new pageupdater_1.PageUpdater(this.channel, user, this.embeds, options).awaitPageUpdate();
-        update.on('page', (page, a, c) => {
-            this.emit('pageUpdate', page);
+        update.on('page', (page, a, c, m) => {
+            var _a;
+            if (!((_a = this.collection) === null || _a === void 0 ? void 0 : _a.ended)) {
+                this.emit('pageUpdate', page);
+                this.channel.send(m);
+            }
             if (options === null || options === void 0 ? void 0 : options.singleListen)
                 c.stop();
         });
-        update.on('cancel', c => {
+        update.on('cancel', (c, r, m) => {
+            var _a;
+            if (!((_a = this.collection) === null || _a === void 0 ? void 0 : _a.ended))
+                this.channel.send(m);
             c.stop();
+        });
+        update.on('invalid', (c, r, m) => {
+            var _a;
+            if (!((_a = this.collection) === null || _a === void 0 ? void 0 : _a.ended))
+                this.channel.send(m);
         });
         return this;
     }
@@ -446,17 +472,14 @@ class EmbedBuilder extends events_1.EventEmitter {
      * Builds the embed.
      * @emits stop
      * @emits create
+     * @emits pageUpdate
+     * @emits preSend
      * @listens pageUpdate
      */
     build() {
         return new Promise((resolve, reject) => {
             if (!this.channel || !this.embeds.length)
                 return reject(new Error('A channel, and array of embeds is required.'));
-            const back = this.back ? this.back : '◀';
-            const first = this.first ? this.first : '⏪';
-            const stop = this.stop ? this.stop : '⏹';
-            const last = this.last ? this.last : '⏩';
-            const next = this.next ? this.next : '▶';
             const reactions = new Map();
             const defaultReactionEmojis = ['first', 'back', 'stop', 'next', 'last'];
             if (this.enabledReactions != defaultReactionEmojis) {
@@ -475,6 +498,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                     embed.setFooter(this.pageFormat
                         .replace('%p', (this.embeds.indexOf(embed) + 1).toString())
                         .replace('%m', this.embeds.length.toString()));
+            this.emit('preSend', reactions);
             this.channel.send(this.embeds[0]).then((sent) => __awaiter(this, void 0, void 0, function* () {
                 if (sent instanceof Array)
                     return reject(new Error('Got multiple messages instead of one.'));
@@ -482,7 +506,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                 if (sent.author)
                     author = sent.author;
                 else
-                    throw new Error('Author was not a user!');
+                    return reject(new Error('Author was not a user!'));
                 // Embed has multiple pages, set up emoji buttons
                 if (this.usingPages && this.embeds.length > 1) {
                     reactions.forEach((e, r) => __awaiter(this, void 0, void 0, function* () {
@@ -490,19 +514,19 @@ class EmbedBuilder extends events_1.EventEmitter {
                             let emojiResolvable;
                             switch (r) {
                                 case 'first':
-                                    emojiResolvable = first;
+                                    emojiResolvable = this.first;
                                     break;
                                 case 'next':
-                                    emojiResolvable = next;
+                                    emojiResolvable = this.next;
                                     break;
                                 case 'stop':
-                                    emojiResolvable = stop;
+                                    emojiResolvable = this.stop;
                                     break;
                                 case 'back':
-                                    emojiResolvable = back;
+                                    emojiResolvable = this.back;
                                     break;
                                 case 'last':
-                                    emojiResolvable = last;
+                                    emojiResolvable = this.last;
                                     break;
                                 default:
                                     return reject(new Error("Could not parse emoji"));
@@ -523,7 +547,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                 const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id)
                     .on('end', () => {
                     if (!this.hasColor)
-                        sent.edit(this.embeds[page].setColor(0xE21717));
+                        sent.edit(this.embeds[page].setColor(this.endColor));
                     if (this.timer) {
                         clearTimeout(this.timer);
                         this.timer = undefined;
@@ -534,27 +558,28 @@ class EmbedBuilder extends events_1.EventEmitter {
                     reaction.users.remove(user);
                     if (this.usingPages && this.embeds.length > 1) {
                         switch (reaction.emoji.name) {
-                            case first:
+                            case this.first:
                                 page = 0;
                                 break;
-                            case back:
+                            case this.back:
                                 if (page === 0)
                                     return;
                                 page--;
                                 break;
-                            case stop:
+                            case this.stop:
                                 collection.stop();
                                 break;
-                            case next:
+                            case this.next:
                                 if (page === this.embeds.length - 1)
                                     return;
                                 page++;
                                 break;
-                            case last:
+                            case this.last:
                                 page = this.embeds.length - 1;
                                 break;
                         }
-                        this.emit('pageUpdate', page);
+                        if (reaction.emoji.name !== this.stop)
+                            this.emit('pageUpdate', page);
                     }
                     // Do custom emoji action
                     if (this.emojis.length > 0) {
@@ -566,8 +591,10 @@ class EmbedBuilder extends events_1.EventEmitter {
                 this.on('pageUpdate', (newPage) => {
                     if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
-                    else
+                    else {
+                        page = newPage;
                         sent.edit(this.embeds[newPage]);
+                    }
                 });
                 this.collection = collection;
                 this.stopFunc = () => {

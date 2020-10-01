@@ -62,22 +62,18 @@ class PageUpdater extends events_1.EventEmitter {
             collector.on('collect', response => {
                 const page = parseInt(response.content);
                 if (isNaN(page) && response.content.startsWith('cancel') && cancel) {
-                    this.emit('cancel', collector, response.content);
-                    response.channel.send(cancelFormat.replace('%u', response.author));
+                    this.emit('cancel', collector, response.content, cancelFormat.replace('%u', response.author));
                 }
                 else if (!isNaN(page)) {
                     if (page < 1 || page > this.embedArray.length) {
-                        this.emit('invalid');
-                        return response.channel.send(invalidPage.replace('%u', response.author));
+                        return this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author));
                     }
-                    this.emit('page', page - 1, response.content, collector);
-                    response.channel.send(success
+                    this.emit('page', page - 1, response.content, collector, success
                         .replace('%u', response.author)
                         .replace('%n', page.toString()));
                 }
                 else {
-                    this.emit('invalid', collector, response.content);
-                    response.channel.send(invalidPage.replace('%u', response.author));
+                    this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author));
                 }
             });
         });

@@ -46,6 +46,10 @@ Adds a MessageEmbed to the array of embeds.
 
 Puts the array of embeds given at the end of the current embeds array.
 
+`setEndColor(color)`
+
+When the collection has ended, and no other custom color is being used, this will be the color the embed is set to. Default is 0xE21717
+
 `setTime(time)`
 
 This will set how long the builder should listen for emotes. Make sure to set your time as milliseconds.
@@ -160,18 +164,23 @@ embedBuilder.defaultReactions(['stop', 'back']);
 ```
 
 ## Events
-[`create`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#create)
+[`create`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#create)
 
 Emitted from build() when the first page has finished building.
 
-[`stop`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#stop)
+[`stop`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#stop)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-[`pageUpdate`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#pageUpdate)
+[`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#pageUpdate)
 
-Emitted from updatePage(). Sets the new page for the bot.
+Emitted from from build() when the builder has changed pages. Sets the new page for the bot.
 
+[`preSend (master only)`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#preSend)
+
+Emitted from build() before the first embed page has been sent in Discord.
+
+## PageUpdater
 PageUpdater documentation can be found [here](http://github.muricans.xyz/embedbuilder/master/classes/pageupdater.html).
 
 ## Example
@@ -204,7 +213,7 @@ client.on('message', message => {
 });
 ```
 
-Here's an example taken from my bot [mbot](https://github.com/muricans/mbot/)
+Here's an example taken from my bot [rolesbot](https://github.com/muricans/rolesbot/)
 
 ```javascript
 const rolebot = require('../rolebot');
