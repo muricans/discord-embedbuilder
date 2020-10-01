@@ -636,6 +636,7 @@ export class EmbedBuilder extends EventEmitter {
                                     page = this.embeds.length - 1;
                                     break;
                             }
+
                             if (reaction.emoji.name !== this.stop)
                                 this.emit('pageUpdate', page);
                         }
@@ -655,6 +656,7 @@ export class EmbedBuilder extends EventEmitter {
                         sent.edit(this.embeds[newPage]);
                     }
                 });
+
                 this.collection = collection;
                 this.stopFunc = () => {
                     this.collection?.stop();
@@ -662,6 +664,7 @@ export class EmbedBuilder extends EventEmitter {
                 };
                 this.date = Date.now();
                 this.timer = setTimeout(this.stopFunc, this.time);
+
                 return resolve(this);
             });
         });
