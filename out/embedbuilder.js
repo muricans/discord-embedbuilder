@@ -158,7 +158,6 @@ class EmbedBuilder extends events_1.EventEmitter {
         if (this.date) {
             this.time += time;
             const currentTime = (this.time + this.date) - Date.now();
-            //console.log(currentTime, this.time);
             if (this.timer && currentTime > 0 && this.stopFunc !== undefined) {
                 clearTimeout(this.timer);
                 this.timer = setTimeout(this.stopFunc, currentTime);
@@ -552,8 +551,8 @@ class EmbedBuilder extends events_1.EventEmitter {
                         this.timer = undefined;
                     }
                     this.emit('stop', sent, page, collection);
-                });
-                collection.on('collect', (reaction, user) => {
+                })
+                    .on('collect', (reaction, user) => {
                     reaction.users.remove(user);
                     if (this.usingPages && this.embeds.length > 1) {
                         switch (reaction.emoji.name) {
@@ -598,7 +597,6 @@ class EmbedBuilder extends events_1.EventEmitter {
                 this.collection = collection;
                 this.stopFunc = () => {
                     var _a;
-                    //console.log('over');
                     (_a = this.collection) === null || _a === void 0 ? void 0 : _a.stop();
                     this.emit('stop', sent, page, collection);
                 };

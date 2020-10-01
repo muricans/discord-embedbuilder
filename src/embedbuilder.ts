@@ -199,7 +199,6 @@ export class EmbedBuilder extends EventEmitter {
         if (this.date) {
             this.time += time;
             const currentTime = (this.time + this.date) - Date.now();
-            //console.log(currentTime, this.time);
             if (this.timer && currentTime > 0 && this.stopFunc !== undefined) {
                 clearTimeout(this.timer);
                 this.timer = setTimeout(this.stopFunc, currentTime);
@@ -608,39 +607,40 @@ export class EmbedBuilder extends EventEmitter {
                             this.timer = undefined;
                         }
                         this.emit('stop', sent, page, collection);
-                    });
-                collection.on('collect', (reaction, user) => {
-                    reaction.users.remove(user);
-                    if (this.usingPages && this.embeds.length > 1) {
-                        switch (reaction.emoji.name) {
-                            case this.first:
-                                page = 0;
-                                break;
-                            case this.back:
-                                if (page === 0) return;
-                                page--;
-                                break;
-                            case this.stop:
-                                collection.stop();
-                                break;
-                            case this.next:
-                                if (page === this.embeds.length - 1) return;
-                                page++;
-                                break;
-                            case this.last:
-                                page = this.embeds.length - 1;
-                                break;
+                    })
+                    .on('collect', (reaction, user) => {
+                        reaction.users.remove(user);
+                        if (this.usingPages && this.embeds.length > 1) {
+                            switch (reaction.emoji.name) {
+                                case this.first:
+                                    page = 0;
+                                    break;
+                                case this.back:
+                                    if (page === 0) return;
+                                    page--;
+                                    break;
+                                case this.stop:
+                                    collection.stop();
+                                    break;
+                                case this.next:
+                                    if (page === this.embeds.length - 1) return;
+                                    page++;
+                                    break;
+                                case this.last:
+                                    page = this.embeds.length - 1;
+                                    break;
+                            }
+
+                            if (reaction.emoji.name !== this.stop)
+                                this.emit('pageUpdate', page);
                         }
-                        if (reaction.emoji.name !== this.stop)
-                            this.emit('pageUpdate', page);
-                    }
-                    // Do custom emoji action
-                    if (this.emojis.length > 0) {
-                        const customEmoji = this.emojis.find(e => e.emoji === reaction.emoji.name || e.emoji === reaction.emoji.id);
-                        if (customEmoji)
-                            customEmoji.do(sent, page, customEmoji.emoji);
-                    }
-                });
+                        // Do custom emoji action
+                        if (this.emojis.length > 0) {
+                            const customEmoji = this.emojis.find(e => e.emoji === reaction.emoji.name || e.emoji === reaction.emoji.id);
+                            if (customEmoji)
+                                customEmoji.do(sent, page, customEmoji.emoji);
+                        }
+                    });
                 this.on('pageUpdate', (newPage) => {
                     if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
@@ -649,14 +649,15 @@ export class EmbedBuilder extends EventEmitter {
                         sent.edit(this.embeds[newPage]);
                     }
                 });
+
                 this.collection = collection;
                 this.stopFunc = () => {
-                    //console.log('over');
                     this.collection?.stop();
                     this.emit('stop', sent, page, collection);
                 };
                 this.date = Date.now();
                 this.timer = setTimeout(this.stopFunc, this.time);
+
                 return resolve(this);
             });
         });
