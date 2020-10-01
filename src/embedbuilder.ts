@@ -602,8 +602,7 @@ export class EmbedBuilder extends EventEmitter {
                 let page = 0;
                 const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id)
                     .on('end', () => {
-                        if (!this.hasColor)
-                            sent.edit(this.embeds[page].setColor(this.endColor));
+                        sent.edit(this.embeds[page].setColor(this.endColor));
                         if (this.timer) {
                             clearTimeout(this.timer);
                             this.timer = undefined;
