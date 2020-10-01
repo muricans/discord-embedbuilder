@@ -36,7 +36,6 @@ export interface PageUpdateOptions {
 }
 
 /**
- * PageUpdater class
  * @noInheritDoc
  */
 export class PageUpdater extends EventEmitter {

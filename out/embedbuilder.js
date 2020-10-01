@@ -14,7 +14,6 @@ const discord_js_1 = require("discord.js");
 const events_1 = require("events");
 const pageupdater_1 = require("./reaction/pageupdater");
 /**
- * EmbedBuilder class
  * @noInheritDoc
  */
 class EmbedBuilder extends events_1.EventEmitter {
@@ -159,7 +158,10 @@ class EmbedBuilder extends events_1.EventEmitter {
             this.time += time;
             const currentTime = (this.time + this.date) - Date.now();
             if (this.timer && currentTime > 0 && this.stopFunc !== undefined) {
+                // build has already been called, everything is set, no undefined.
+                // clear current timer
                 clearTimeout(this.timer);
+                // set new timer with the added amount of time
                 this.timer = setTimeout(this.stopFunc, currentTime);
             }
             else
@@ -178,8 +180,12 @@ class EmbedBuilder extends events_1.EventEmitter {
     resetTimer(time) {
         let notReady = false;
         if (this.timer && this.stopFunc !== undefined) {
+            // build has already been called, no undefined
+            // clear old timer
             clearTimeout(this.timer);
+            // resetting timer, so reset the date as well.
             this.date = Date.now();
+            // set new timer with updated specified time, or already set time.
             this.timer = setTimeout(this.stopFunc, time || this.time);
         }
         else
@@ -201,9 +207,9 @@ class EmbedBuilder extends events_1.EventEmitter {
     /**
      * Whenever the builder changes it's page, it will reset the timer to the current set time.
      */
-    resetTimerOnPage() {
+    resetTimerOnPage(time) {
         this.on('pageUpdate', () => {
-            this.resetTimer();
+            this.resetTimer(time);
         });
         return this;
     }
@@ -590,6 +596,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                     if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
                     else {
+                        // set page to specified in case it's not from reaction.
                         page = newPage;
                         sent.edit(this.embeds[newPage]);
                     }

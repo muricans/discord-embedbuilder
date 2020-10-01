@@ -9,7 +9,6 @@ interface Emojis {
     emoji: (sent: Message, page: number, emoji: string) => void;
 }
 /**
- * EmbedBuilder class
  * @noInheritDoc
  */
 export declare class EmbedBuilder extends EventEmitter {
@@ -131,7 +130,7 @@ export declare class EmbedBuilder extends EventEmitter {
     /**
      * Whenever the builder changes it's page, it will reset the timer to the current set time.
      */
-    resetTimerOnPage(): this;
+    resetTimerOnPage(time?: number): this;
     /**
      *
      * @param embed The embed to push to the array of embeds.
