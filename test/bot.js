@@ -21,19 +21,18 @@ client.on('message', async message => {
   }];
   const help = new EmbedBuilder(message.channel);
   const other = new EmbedBuilder(message.channel);
-  help.calculatePages(23, 3, (embed, i) => {
-    embed.addField(i, Math.floor(Math.random() * 23));
-  });
   other.calculatePages(20, 8, (embed, i) => {
-    embed.addField(i + ' other', Math.floor(Math.random() * 4));
-  });
-  other.setTitle('Other Commands');
-  help.addFields(multiFields);
-  help.addField("test", "test2");
-  help.addEmoji('757146517978087444', (sent) => {
-    sent.channel.send('yep');
-  });
-  help
+      embed.addField(i + ' other', Math.floor(Math.random() * 4));
+    })
+    .setTitle('Other Commands');
+  help.addFields(multiFields)
+    .calculatePages(23, 3, (embed, i) => {
+      embed.addField(i, Math.floor(Math.random() * 23));
+    })
+    .addField("test", "test2")
+    .addEmoji('757146517978087444', (sent) => {
+      sent.channel.send('yep');
+    })
     .setTitle('Commands')
     .concatEmbeds(other.embeds)
     .setTime(5000)

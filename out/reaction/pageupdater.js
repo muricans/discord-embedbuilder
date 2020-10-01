@@ -3,7 +3,6 @@ Object.defineProperty(exports, "__esModule", { value: true });
 exports.PageUpdater = void 0;
 const events_1 = require("events");
 /**
- * PageUpdater class
  * @noInheritDoc
  */
 class PageUpdater extends events_1.EventEmitter {

@@ -14,7 +14,6 @@ const discord_js_1 = require("discord.js");
 const events_1 = require("events");
 const pageupdater_1 = require("./reaction/pageupdater");
 /**
- * EmbedBuilder class
  * @noInheritDoc
  */
 class EmbedBuilder extends events_1.EventEmitter {
@@ -158,9 +157,11 @@ class EmbedBuilder extends events_1.EventEmitter {
         if (this.date) {
             this.time += time;
             const currentTime = (this.time + this.date) - Date.now();
-            //console.log(currentTime, this.time);
             if (this.timer && currentTime > 0 && this.stopFunc !== undefined) {
+                // build has already been called, everything is set, no undefined.
+                // clear current timer
                 clearTimeout(this.timer);
+                // set new timer with the added amount of time
                 this.timer = setTimeout(this.stopFunc, currentTime);
             }
             else
@@ -179,8 +180,12 @@ class EmbedBuilder extends events_1.EventEmitter {
     resetTimer(time) {
         let notReady = false;
         if (this.timer && this.stopFunc !== undefined) {
+            // build has already been called, no undefined
+            // clear old timer
             clearTimeout(this.timer);
+            // resetting timer, so reset the date as well.
             this.date = Date.now();
+            // set new timer with updated specified time, or already set time.
             this.timer = setTimeout(this.stopFunc, time || this.time);
         }
         else
@@ -202,9 +207,9 @@ class EmbedBuilder extends events_1.EventEmitter {
     /**
      * Whenever the builder changes it's page, it will reset the timer to the current set time.
      */
-    resetTimerOnPage() {
+    resetTimerOnPage(time) {
         this.on('pageUpdate', () => {
-            this.resetTimer();
+            this.resetTimer(time);
         });
         return this;
     }
@@ -552,8 +557,8 @@ class EmbedBuilder extends events_1.EventEmitter {
                         this.timer = undefined;
                     }
                     this.emit('stop', sent, page, collection);
-                });
-                collection.on('collect', (reaction, user) => {
+                })
+                    .on('collect', (reaction, user) => {
                     reaction.users.remove(user);
                     if (this.usingPages && this.embeds.length > 1) {
                         switch (reaction.emoji.name) {
@@ -591,6 +596,7 @@ class EmbedBuilder extends events_1.EventEmitter {
                     if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
                     else {
+                        // set page to specified in case it's not from reaction.
                         page = newPage;
                         sent.edit(this.embeds[newPage]);
                     }
@@ -598,7 +604,6 @@ class EmbedBuilder extends events_1.EventEmitter {
                 this.collection = collection;
                 this.stopFunc = () => {
                     var _a;
-                    //console.log('over');
                     (_a = this.collection) === null || _a === void 0 ? void 0 : _a.stop();
                     this.emit('stop', sent, page, collection);
                 };

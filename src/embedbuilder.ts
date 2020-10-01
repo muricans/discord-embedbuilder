@@ -31,7 +31,6 @@ interface Emojis {
 }
 
 /**
- * EmbedBuilder class
  * @noInheritDoc
  */
 export class EmbedBuilder extends EventEmitter {
@@ -199,9 +198,11 @@ export class EmbedBuilder extends EventEmitter {
         if (this.date) {
             this.time += time;
             const currentTime = (this.time + this.date) - Date.now();
-            //console.log(currentTime, this.time);
             if (this.timer && currentTime > 0 && this.stopFunc !== undefined) {
+                // build has already been called, everything is set, no undefined.
+                // clear current timer
                 clearTimeout(this.timer);
+                // set new timer with the added amount of time
                 this.timer = setTimeout(this.stopFunc, currentTime);
             } else notReady = true;
         } else notReady = true;
@@ -216,8 +217,12 @@ export class EmbedBuilder extends EventEmitter {
     public resetTimer(time?: number): this {
         let notReady = false;
         if (this.timer && this.stopFunc !== undefined) {
+            // build has already been called, no undefined
+            // clear old timer
             clearTimeout(this.timer);
+            // resetting timer, so reset the date as well.
             this.date = Date.now();
+            // set new timer with updated specified time, or already set time.
             this.timer = setTimeout(this.stopFunc, time || this.time);
         } else notReady = true;
         if (notReady) throw new Error('Builder was not ready to add time! Date, timer, and stopFunc must be defined by the builder.');
@@ -238,9 +243,9 @@ export class EmbedBuilder extends EventEmitter {
     /**
      * Whenever the builder changes it's page, it will reset the timer to the current set time.
      */
-    public resetTimerOnPage(): this {
+    public resetTimerOnPage(time?: number): this {
         this.on('pageUpdate', () => {
-            this.resetTimer();
+            this.resetTimer(time);
         });
         return this;
     }
@@ -608,50 +613,50 @@ export class EmbedBuilder extends EventEmitter {
                             this.timer = undefined;
                         }
                         this.emit('stop', sent, page, collection);
-                    });
-                collection.on('collect', (reaction, user) => {
-                    reaction.users.remove(user);
-                    if (this.usingPages && this.embeds.length > 1) {
-                        switch (reaction.emoji.name) {
-                            case this.first:
-                                page = 0;
-                                break;
-                            case this.back:
-                                if (page === 0) return;
-                                page--;
-                                break;
-                            case this.stop:
-                                collection.stop();
-                                break;
-                            case this.next:
-                                if (page === this.embeds.length - 1) return;
-                                page++;
-                                break;
-                            case this.last:
-                                page = this.embeds.length - 1;
-                                break;
+                    })
+                    .on('collect', (reaction, user) => {
+                        reaction.users.remove(user);
+                        if (this.usingPages && this.embeds.length > 1) {
+                            switch (reaction.emoji.name) {
+                                case this.first:
+                                    page = 0;
+                                    break;
+                                case this.back:
+                                    if (page === 0) return;
+                                    page--;
+                                    break;
+                                case this.stop:
+                                    collection.stop();
+                                    break;
+                                case this.next:
+                                    if (page === this.embeds.length - 1) return;
+                                    page++;
+                                    break;
+                                case this.last:
+                                    page = this.embeds.length - 1;
+                                    break;
+                            }
+                            if (reaction.emoji.name !== this.stop)
+                                this.emit('pageUpdate', page);
                         }
-                        if (reaction.emoji.name !== this.stop)
-                            this.emit('pageUpdate', page);
-                    }
-                    // Do custom emoji action
-                    if (this.emojis.length > 0) {
-                        const customEmoji = this.emojis.find(e => e.emoji === reaction.emoji.name || e.emoji === reaction.emoji.id);
-                        if (customEmoji)
-                            customEmoji.do(sent, page, customEmoji.emoji);
-                    }
-                });
+                        // Do custom emoji action
+                        if (this.emojis.length > 0) {
+                            const customEmoji = this.emojis.find(e => e.emoji === reaction.emoji.name || e.emoji === reaction.emoji.id);
+                            if (customEmoji)
+                                customEmoji.do(sent, page, customEmoji.emoji);
+                        }
+                    });
                 this.on('pageUpdate', (newPage) => {
                     if (collection.ended || newPage > this.embeds.length - 1 || newPage < 0)
                         return;
                     else {
+                        // set page to specified in case it's not from reaction.
                         page = newPage;
                         sent.edit(this.embeds[newPage]);
                     }
                 });
                 this.collection = collection;
                 this.stopFunc = () => {
-                    //console.log('over');
                     this.collection?.stop();
                     this.emit('stop', sent, page, collection);
                 };
