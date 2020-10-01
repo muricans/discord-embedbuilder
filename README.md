@@ -172,16 +172,16 @@ Emitted from build() when the first page has finished building.
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-[`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#pageUpdate)
+[`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#pageupdate)
 
 Emitted from from build() when the builder has changed pages. Sets the new page for the bot.
 
-[`preSend (master only)`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#preSend)
+[`preSend (master only)`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#presend)
 
 Emitted from build() before the first embed page has been sent in Discord.
 
 ## PageUpdater
-PageUpdater documentation can be found [here](http://github.muricans.xyz/embedbuilder/master/classes/pageupdater.html).
+PageUpdater documentation can be found [here](http://github.muricans.xyz/embedbuilder/classes/pageupdater.html).
 
 ## Example
 First import discord-embedbuilder into your project.
