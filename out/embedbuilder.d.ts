@@ -61,11 +61,27 @@ export declare class EmbedBuilder extends EventEmitter {
      * });
      * ```
      *
-     * @param data This is amount of data to process.
+     * @param data This is the amount of data to process.
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
     calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this;
+    /**
+    * Async version of calculatePages
+    *
+    * Makes the page calculator wait for operations to finish.
+    * ```javascript
+    * await embedBuilder.calculatePagesAsync(users.length, 10, async (embed, i) => {
+    *  const user = await getSomeUser(users[i]);
+    *  embed.addField(user.username, user.points, true);
+    * });
+    * ```
+    *
+    * @param data This is the amount of data to process.
+    * @param dataPerPage This is how much data you want displayed per page.
+    * @param insert Gives you an embed and the current index.
+    */
+    calculatePagesAsync(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => Promise<void>): Promise<this>;
     /**
      *
      * @param use Use the page system for the embed.
@@ -136,11 +152,6 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param embed The embed to push to the array of embeds.
      */
     addEmbed(embed: MessageEmbed): this;
-    /**
-     * @returns {MessageEmbed[]} The current embeds that this builder has.
-     * @deprecated Use [[EmbedBuilder.embeds]] instead.
-     */
-    getEmbeds(): MessageEmbed[];
     setTitle(title: string): this;
     setFooter(text: any, icon?: string): this;
     setDescription(description: any): this;

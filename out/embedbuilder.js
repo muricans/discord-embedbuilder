@@ -61,7 +61,7 @@ class EmbedBuilder extends events_1.EventEmitter {
      * });
      * ```
      *
-     * @param data This is amount of data to process.
+     * @param data This is the amount of data to process.
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
@@ -80,6 +80,36 @@ class EmbedBuilder extends events_1.EventEmitter {
                 page++;
         }
         return this;
+    }
+    /**
+    * Async version of calculatePages
+    *
+    * Makes the page calculator wait for operations to finish.
+    * ```javascript
+    * await embedBuilder.calculatePagesAsync(users.length, 10, async (embed, i) => {
+    *  const user = await getSomeUser(users[i]);
+    *  embed.addField(user.username, user.points, true);
+    * });
+    * ```
+    *
+    * @param data This is the amount of data to process.
+    * @param dataPerPage This is how much data you want displayed per page.
+    * @param insert Gives you an embed and the current index.
+    */
+    calculatePagesAsync(data, dataPerPage, insert) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let page = 1;
+            for (let i = 0; i < dataPerPage * page; i++) {
+                if (i === data)
+                    break;
+                if (!this.embeds[page - 1])
+                    this.embeds.push(new discord_js_1.MessageEmbed());
+                yield insert(this.embeds[page - 1], i);
+                if (i == (dataPerPage * page) - 1)
+                    page++;
+            }
+            return this;
+        });
     }
     /**
      *
@@ -220,14 +250,6 @@ class EmbedBuilder extends events_1.EventEmitter {
     addEmbed(embed) {
         this.embeds.push(embed);
         return this;
-    }
-    /**
-     * @returns {MessageEmbed[]} The current embeds that this builder has.
-     * @deprecated Use [[EmbedBuilder.embeds]] instead.
-     */
-    getEmbeds() {
-        process.emitWarning('#getEmbeds() is deprecated. Use #embeds instead.', 'DeprecationWarning');
-        return this.embeds;
     }
     setTitle(title) {
         this._all((i) => {

@@ -24,57 +24,75 @@ discord-embedbuilder uses the latest stable version of discord.js (12.3.1)
 ## Methods
 All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
 
-`usePages(use)`
+### `usePages(use)`
 
 If this is set to false, the builder will not use the next, back, last, first, stop emotes.
 
-`changeChannel(channel)`
+<hr/>
+
+### `changeChannel(channel)`
 
 Change the current channel.
 
 **<span style="color:red">Warning:</span>** This should not be used to set the channel. You can set the channel in the constructor.
 
-`setEmbeds(embeds)`
+<hr/>
+
+### `setEmbeds(embeds)`
 
 The array of MessageEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
 
-`addEmbed(embed)`
+<hr/>
+
+### `addEmbed(embed)`
 
 Adds a MessageEmbed to the array of embeds.
 
-`concatEmbeds(embeds)`
+<hr/>
+
+### `concatEmbeds(embeds)`
 
 Puts the array of embeds given at the end of the current embeds array.
 
-`setEndColor(color)`
+<hr/>
+
+### `setEndColor(color)`
 
 When the collection has ended, and no other custom color is being used, this will be the color the embed is set to. Default is 0xE21717
 
-`setTime(time)`
+<hr/>
+
+### `setTime(time)`
 
 This will set how long the builder should listen for emotes. Make sure to set your time as milliseconds.
 
-`addTime(time)`
+<hr/>
+
+### `addTime(time)`
 
 Use after the embed has been built. Will increase the amount of time the collector is active before it stops.
 
-`resetTimer(time?)`
+<hr/>
+
+### `resetTimer(time?)`
 
 Resets the timer to either the time already set, or a new time given.
 
-`addTimeOnPage(time)`
+<hr/>
+
+### `addTimeOnPage(time)`
 
 Whenever the builder changes it's page, it will add specified amount of time (ms) to the current running timer.
 
-`resetTimerOnPage()`
+<hr/>
+
+### `resetTimerOnPage()`
 
 Whenever the builder changes it's page, it will reset the timer to the current set time.
 
-`getEmbeds()`
+<hr/>
 
-Returns the current embeds that the builder has.
-
-`addEmoji(emoji, (sent, page, builder, emoji))`
+### `addEmoji(emoji, (sent, page, builder, emoji))`
 
 This will insert the provided emoji into the builder, and when it is clicked it will perform the action that is provided.
 
@@ -86,7 +104,9 @@ builder.addEmoji('❗', (sent, page, emoji) => {
 });
 ```
 
-`addEmojis(emojis)`
+<hr/>
+
+### `addEmojis(emojis)`
 
 Add multiple emojis to do different actions.
 
@@ -100,27 +120,37 @@ builder.addEmojis([{
 }]);
 ```
 
-`deleteEmoji(emoji)`
+<hr/>
+
+### `deleteEmoji(emoji)`
 
 Deletes an emoji from the list of emojis.
 
-`cancel(callback?)`
+<hr/>
+
+### `cancel(callback?)`
 
 Cancels the builder before the timer ends.
 
 If a callback is provided, it will execute after the builder has canceled.
 
-`showPageNumber(use)`
+<hr/>
+
+### `showPageNumber(use)`
 
 If set to true (by default it is true), it will show the current page on the footer of the embed. (Page x/y)
 
-`setPageFormat(format)`
+<hr/>
+
+### `setPageFormat(format)`
 
 If showing page numbers, this is the format that will be used.
 
 By default format is %p/%m which converts to current/max.
 
-`calculatePages(data, dataPerPage, insert)`
+<hr/>
+
+### `calculatePages(data, dataPerPage, insert)`
 
 This calculates pages for the builder to work with.
 
@@ -134,24 +164,46 @@ embedBuilder.calculatePages(users.length, 10, (embed, i) => {
 });
 ```
 
-`updatePage(page)`
+<hr/>
+
+### `calculatePagesAsync(data, dataPerPage, insert)`
+
+Async version of calculatePages
+
+Makes the page calculator wait for operations to finish.
+```javascript
+await embedBuilder.calculatePagesAsync(users.length, 10, async (embed, i) => {
+    const user = await getSomeUser(users[i]);
+    embed.addField(user.username, user.points, true);
+});
+```
+
+<hr/>
+
+### `updatePage(page)`
 
 Updates the current page to the one set there. This checks if the page is valid itself. Make sure the first page of the builder has already gone through before using this.
 
-`setPageEmoji(emoji, newEmoji)`
+<hr/>
+
+### `setPageEmoji(emoji, newEmoji)`
 
 Replaces current type of emoji given with the new emoji provided.
 
 Types allowed: back, first, stop, last, next
 
-`awaitPageUpdate(user, options)`
+<hr/>
+
+### `awaitPageUpdate(user, options)`
 
 [options](http://github.muricans.xyz/embedbuilder/master/interfaces/pageupdateoptions.html)
 
 Create an updater to await responses from a user,
 then set the builders current page to the page given.
 
-`defaultReactions(reactions)`
+<hr/>
+
+### `defaultReactions(reactions)`
 
 The reactions the bot will use. If this  method is not used in the builder, the bot will automatically add all reactions.
 
@@ -163,20 +215,22 @@ The reactions the bot will use. If this  method is not used in the builder, the 
 embedBuilder.defaultReactions(['stop', 'back']);
 ```
 
+<hr/>
+
 ## Events
-[`create`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#create)
+### [`create`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#create)
 
 Emitted from build() when the first page has finished building.
 
-[`stop`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#stop)
+### [`stop`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#stop)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-[`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#pageupdate)
+### [`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#pageupdate)
 
 Emitted from from build() when the builder has changed pages. Sets the new page for the bot.
 
-[`preSend (master only)`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#presend)
+### [`preSend (master only)`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#presend)
 
 Emitted from build() before the first embed page has been sent in Discord.
 
