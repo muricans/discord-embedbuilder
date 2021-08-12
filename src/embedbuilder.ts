@@ -4,11 +4,9 @@ import {
     Message,
     ColorResolvable,
     ReactionCollector,
-    FileOptions,
     DMChannel,
     Collection,
     MessageReaction,
-    MessageAttachment,
     User,
     EmbedFieldData,
 } from "discord.js";

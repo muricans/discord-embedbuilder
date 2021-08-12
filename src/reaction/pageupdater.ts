@@ -92,22 +92,23 @@ export class PageUpdater extends EventEmitter {
         } = this.options;
         this.channel.send(message.replace('%u', `${this.user}`)).then(sent => {
             if (sent instanceof Array) sent = sent[0];
-            const collector = sent.channel.createMessageCollector(msg => msg.author.id === this.user.id, {
+            const collector = sent.channel.createMessageCollector({filter: (msg) => msg.author.id === this.user.id,
                 time: time,
             });
-            collector.on('collect', response => {
+            collector.on('collect', (response) => {
                 const page = parseInt(response.content);
                 if (isNaN(page) && response.content.startsWith('cancel') && cancel) {
-                    this.emit('cancel', collector, response.content, cancelFormat.replace('%u', response.author));
+                    this.emit('cancel', collector, response.content, cancelFormat.replace('%u', response.author.toString()));
                 } else if (!isNaN(page)) {
                     if (page < 1 || page > this.embedArray.length) {
-                        return this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author));
+                        this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author.toString()));
+                        return
                     }
                     this.emit('page', page - 1, response.content, collector, success
-                        .replace('%u', response.author)
+                        .replace('%u', response.author.toString())
                         .replace('%n', page.toString()));
                 } else {
-                    this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author));
+                    this.emit('invalid', collector, response.content, invalidPage.replace('%u', response.author.toString()));
                 }
             });
         });

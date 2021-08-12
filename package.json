@@ -5,7 +5,8 @@
   "main": "out/index.js",
   "types": "out/index.d.ts",
   "scripts": {
-    "build": "tsc & typedoc",
+    "build": "tsc ; echo 'Done'",
+    "build-doc": "typedoc --options ./typedoc.json",
     "check": "npm publish --dry-run",
     "lint": "eslint . --ext .ts"
   },
