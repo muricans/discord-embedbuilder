@@ -4,11 +4,9 @@ import {
     Message,
     ColorResolvable,
     ReactionCollector,
-    FileOptions,
     DMChannel,
     Collection,
     MessageReaction,
-    MessageAttachment,
     User,
     EmbedFieldData,
 } from "discord.js";
@@ -333,13 +331,6 @@ export class EmbedBuilder extends EventEmitter {
         return this;
     }
 
-    public attachFiles(file: (string | MessageAttachment | FileOptions)[]): this {
-        this._all(i => {
-            this.embeds[i].attachFiles(file);
-        });
-        return this;
-    }
-
     /**
      * Adds a single field to all embeds.
      * @param name Name of the field
@@ -581,7 +572,7 @@ export class EmbedBuilder extends EventEmitter {
                         .replace('%m', this.embeds.length.toString())
                     );
             this.emit('preSend', reactions);
-            this.channel.send(this.embeds[0]).then(async sent => {
+            this.channel.send({embeds: [this.embeds[0]]}).then(async sent => {
                 if (sent instanceof Array) return reject(new Error('Got multiple messages instead of one.'));
                 let author: User;
                 if (sent.author)
@@ -625,9 +616,9 @@ export class EmbedBuilder extends EventEmitter {
                 this.emit('create', sent, sent.reactions);
                 // Set up collection event.
                 let page = 0;
-                const collection = sent.createReactionCollector((reaction, user) => user.id !== author.id)
+                const collection = sent.createReactionCollector({filter: (reaction, user) => user.id !== author.id})
                     .on('end', () => {
-                        sent.edit(this.embeds[page].setColor(this.endColor));
+                        sent.edit({embeds: [this.embeds[page].setColor(this.endColor)]});
                         if (this.timer) {
                             clearTimeout(this.timer);
                             this.timer = undefined;
@@ -673,7 +664,7 @@ export class EmbedBuilder extends EventEmitter {
                     else {
                         // set page to specified in case it's not from reaction.
                         page = newPage;
-                        sent.edit(this.embeds[newPage]);
+                        sent.edit({embeds: [this.embeds[newPage]]});
                     }
                 });
 
