@@ -6,6 +6,7 @@ test
 docs
 index.ts
 typedoc.js
+typedoc.json
 .gitignore
 src
 .github

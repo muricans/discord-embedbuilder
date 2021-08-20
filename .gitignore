@@ -4,5 +4,6 @@ tsconfig.json
 .DS_Store
 docs
 typedoc.js
+typedoc.json
 test/settings.json
 stable.bat

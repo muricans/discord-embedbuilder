@@ -1,5 +1,5 @@
 /// <reference types="node" />
-import { TextChannel, MessageEmbed, Message, ColorResolvable, FileOptions, DMChannel, MessageAttachment, User, EmbedFieldData } from "discord.js";
+import { TextChannel, MessageEmbed, Message, ColorResolvable, DMChannel, User, EmbedFieldData } from "discord.js";
 import { EventEmitter } from "events";
 import { PageUpdateOptions } from './reaction/pageupdater';
 /**
@@ -158,7 +158,6 @@ export declare class EmbedBuilder extends EventEmitter {
     setImage(url: string): this;
     setThumbnail(url: string): this;
     spliceFields(index: number, deleteCount: number, fields?: EmbedFieldData[]): this;
-    attachFiles(file: (string | MessageAttachment | FileOptions)[]): this;
     /**
      * Adds a single field to all embeds.
      * @param name Name of the field
