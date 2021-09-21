@@ -2,37 +2,73 @@
 name: Bug report
 about: Create a report to help us improve
 title: ''
-labels: ''
+labels: bug
 assignees: ''
 
 ---
 
-**Describe the bug**
-A clear and concise description of what the bug is.
+**Describe your issue**
+<!--
+
+    A clear and concise description of what the issue is.
+
+    Examples:
+    - I cannot do X.
+    - I have trouble doing X.
+    - Feature X has stopped working for me.
+
+-->
+
+
 
 **To Reproduce**
-Steps to reproduce the behavior:
-1. Go to '...'
-2. Click on '....'
-3. Scroll down to '....'
-4. See error
+<!--
+
+    Steps to reproduce the behavior:
+    1. Go to '...'
+    2. Click on '....'
+    3. Scroll down to '....'
+    4. See error
+
+-->
+
+
 
 **Expected behavior**
-A clear and concise description of what you expected to happen.
+<!--
+
+    A clear and concise description of what you expected to happen.
+
+-->
+
 
 **Screenshots**
-If applicable, add screenshots to help explain your problem.
+<!--
 
-**Desktop (please complete the following information):**
- - OS: [e.g. iOS]
- - Browser [e.g. chrome, safari]
- - Version [e.g. 22]
+    If applicable, add screenshots to help explain your problem.
 
-**Smartphone (please complete the following information):**
- - Device: [e.g. iPhone6]
- - OS: [e.g. iOS8.1]
- - Browser [e.g. stock browser, safari]
- - Version [e.g. 22]
+-->
+
+
+
+**OS & Versions (please complete the following information):**
+<!--
+
+    The name of your Operating System and versioning of applicable modules.
+    
+    Examples:
+    - OS: [e.g. Windows/Mac/Linux]
+    - Version: [e.g. discord.js v13 / discord-embedbuilder v3.4.0]
+
+-->
+
+
 
 **Additional context**
-Add any other context about the problem here.
+<!--
+
+    Add any other context about the problem here.
+
+-->
+
+
