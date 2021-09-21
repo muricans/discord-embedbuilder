@@ -7,10 +7,10 @@ assignees: ''
 
 ---
 
-**Describe the bug**
+**Describe your issue**
 <!--
 
-    A clear and concise description of what the bug is.
+    A clear and concise description of what the issue is.
 
     Examples:
     - I cannot do X.
@@ -38,7 +38,6 @@ assignees: ''
 <!--
 
     A clear and concise description of what you expected to happen.
-
 
 -->
 
