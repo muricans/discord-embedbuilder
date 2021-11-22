@@ -33,6 +33,34 @@ interface Emojis {
  */
 export class EmbedBuilder extends EventEmitter {
     /**
+     * Emitted when the builder has stopped
+     * @event
+     */
+     //eslint-disable-next-line @typescript-eslint/no-empty-function
+     static stop = (sent: Message, lastPage: number, collector: ReactionCollector) => {};
+
+    /**
+     * Emitted when the builder is finished creating the first page.
+     * @event
+     */
+     //eslint-disable-next-line @typescript-eslint/no-empty-function
+     static create = (sent: Message, reactions: Collection<string, MessageReaction>) => {};
+
+    /**
+     * Emitted when the page for the builder has updated.
+     * @event
+     */
+     //eslint-disable-next-line @typescript-eslint/no-empty-function
+     static pageUpdate = (page: number) => {};
+
+    /**
+     * Emitted before the first embed has been sent.
+     * @event
+     */
+     //eslint-disable-next-line @typescript-eslint/no-empty-function
+     static preSend = (reactions: Map<string, boolean>) => {};
+
+    /**
      * The channel being used with the EmbedBuilder.
      */
     public channel: TextChannel | DMChannel;
@@ -680,28 +708,4 @@ export class EmbedBuilder extends EventEmitter {
             });
         });
     }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace EmbedBuilder {
-    /**
-     * Emitted when the builder has stopped.
-     * @event stop
-     */
-    declare function stop(sent: Message, lastPage: number, collector: ReactionCollector): void;
-    /**
-     * Emitted when the builder is finished creating the first page.
-     * @event create
-     */
-    declare function create(sent: Message, reactions: Collection<string, MessageReaction>): void;
-    /**
-     * Emitted when the page for the builder has updated.
-     * @event pageUpdate
-     */
-    declare function pageUpdate(page: number): void;
-    /**
-     * Emitted before the first embed has been sent.
-     * @event preSend
-     */
-    declare function preSend(reactions: Map<string, boolean>): void;
 }

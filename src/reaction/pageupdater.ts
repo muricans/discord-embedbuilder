@@ -39,6 +39,38 @@ export interface PageUpdateOptions {
  * @noInheritDoc
  */
 export class PageUpdater extends EventEmitter {
+    /**
+     * Emitted when it has received a valid number.
+     * @event
+     * @param page The page number received.
+     * @param content The content that contained the page number.
+     * @param collector The message collector.
+     * @param message The message that has been formatted to be sent to the user.
+     */
+     //eslint-disable-next-line @typescript-eslint/no-empty-function
+    static page = (page:number, content:string, collector:MessageCollector, message:string) => {};
+
+
+    /**
+     * Emitted when it has received an invalid number or page.
+     * @event
+     * @param content The content that contained the page number.
+     * @param collector The message collector.
+     * @param message The message that has been formatted to be sent to the user.
+     */
+     //eslint-disable-next-line @typescript-eslint/no-empty-function
+    static invalid = (collector: MessageCollector, content: string, message: string) => {};
+
+    /**
+     * Emitted when it has been canceled or it has ended.
+     * @event
+     * @param collector The message collector.
+     * @param content The content that contained the cancel keyword.
+     * @param message The message that has been formatted to be sent to the user.
+     */
+     //eslint-disable-next-line @typescript-eslint/no-empty-function
+     static cancel = (collector: MessageCollector, content: string, message: string) => {};
+
     private channel: TextChannel | DMChannel;
     private user: User;
     private embedArray: MessageEmbed[];
@@ -114,33 +146,4 @@ export class PageUpdater extends EventEmitter {
         });
         return this;
     }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-namespace
-export namespace PageUpdater {
-    /**
-     * Emitted when it has received a valid number.
-     * @event page
-     * @param page The page number received.
-     * @param content The content that contained the page number.
-     * @param collector The message collector.
-     * @param message The message that has been formatted to be sent to the user.
-     */
-    declare function page(page: number, content: string, collector: MessageCollector, message: string): void;
-    /**
-     * Emitted when it has received an invalid number or page.
-     * @event invalid
-     * @param collector The message collector.
-     * @param content The content that had an invalid response in it.
-     * @param message The message that has been formatted to be sent to the user.
-     */
-    declare function invalid(collector: MessageCollector, content: string, message: string): void;
-    /**
-     * Emitted when it has been canceled or it has ended.
-     * @event cancel
-     * @param collector The message collector.
-     * @param content The content that contained the cancel keyword.
-     * @param message The message that has been formatted to be sent to the user.
-     */
-    declare function cancel(collector: MessageCollector, content: string, message: string): void;
 }
