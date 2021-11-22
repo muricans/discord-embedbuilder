@@ -196,7 +196,7 @@ Types allowed: back, first, stop, last, next
 
 ### `awaitPageUpdate(user, options)`
 
-[options](http://github.muricans.xyz/embedbuilder/master/interfaces/pageupdateoptions.html)
+[options](http://github.muricans.xyz/embedbuilder/master/interfaces/PageUpdateOptions.html)
 
 Create an updater to await responses from a user,
 then set the builders current page to the page given.
@@ -218,24 +218,24 @@ embedBuilder.defaultReactions(['stop', 'back']);
 <hr/>
 
 ## Events
-### [`create`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#create)
+### [`create`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#create)
 
 Emitted from build() when the first page has finished building.
 
-### [`stop`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#stop)
+### [`stop`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#stop)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-### [`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/embedbuilder.html#pageupdate)
+### [`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#pageupdate)
 
 Emitted from from build() when the builder has changed pages. Sets the new page for the bot.
 
-### [`preSend (master only)`](http://github.muricans.xyz/embedbuilder/master/classes/embedbuilder.html#presend)
+### [`preSend`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#presend)
 
 Emitted from build() before the first embed page has been sent in Discord.
 
 ## PageUpdater
-PageUpdater documentation can be found [here](http://github.muricans.xyz/embedbuilder/classes/pageupdater.html).
+PageUpdater documentation can be found [here](http://github.muricans.xyz/embedbuilder/classes/PageUpdater.html).
 
 ## Example
 First import discord-embedbuilder into your project.
