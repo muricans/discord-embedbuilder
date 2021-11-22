@@ -196,7 +196,7 @@ Types allowed: back, first, stop, last, next
 
 ### `awaitPageUpdate(user, options)`
 
-[options](http://github.muricans.xyz/embedbuilder/master/interfaces/PageUpdateOptions.html)
+[options](http://github.muricans.xyz/embedbuilder/interfaces/PageUpdateOptions.html)
 
 Create an updater to await responses from a user,
 then set the builders current page to the page given.
