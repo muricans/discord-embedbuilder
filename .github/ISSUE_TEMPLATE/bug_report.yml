@@ -50,7 +50,8 @@ body:
         required: true
     attributes:
         label: OS & Versions
-        description: The name of your Operating System and versioning of applicable modules.
+        description: |
+            The name of your Operating System and versioning of applicable modules.
         placeholder: |
             Examples:
               - OS: [e.g. Windows/Mac/Linux]
