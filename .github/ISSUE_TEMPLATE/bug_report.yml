@@ -1,0 +1,64 @@
+name: Bug report
+description: Create a report to help us improve
+labels: bug
+
+body:
+  - type: textarea
+    id: description
+    validations: 
+        required: true
+    attributes:
+        label: Describe your issue
+        description: |
+            A clear and concise description of what the issue is.
+        placeholder: | 
+            Examples:
+              - I cannot do X.
+              - I have trouble doing X.
+              - Feature X has stopped working for me.
+
+  - type: textarea
+    id: reproduction
+    validations:
+        required: true
+    attributes:
+        label: Steps to Reproduce
+        description: |
+            Steps to reproduce the behavior.
+        placeholder: |
+            1. Go to '...'
+            2. Click on '....'
+            3. Scroll down to '....'
+            4. See error
+
+  - type: textarea
+    id: behavior
+    attributes:
+        label: Expected Behavior
+        description: A clear and concise description of what you expected to happen.
+
+  - type: textarea
+    id: screenshots
+    attributes:
+        label: Screenshots
+        description: While optional, it's highly encouraged to include screenshots or videos to illustrate what you mean.
+        placeholder: You can upload them using the text editor's dedicated button.
+
+  - type: textarea
+    id: versions
+    validations:
+        required: true
+    attributes:
+        label: OS & Versions
+        description: |
+            The name of your Operating System and versioning of applicable modules.
+        placeholder: |
+            Examples:
+              - OS: [e.g. Windows/Mac/Linux]
+              - Version: [e.g. discord.js v13 / discord-embedbuilder v3.4.0]
+
+  - type: textarea
+    id: context
+    attributes:
+        label: Additional Context
+        description: Add any other context about the problem here.
