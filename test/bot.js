@@ -1,36 +1,45 @@
-/* eslint-disable */
 const {
-  Client, Intents
+  Client, GatewayIntentBits, Events
 } = require('discord.js');
 const {
   token
 } = require('./settings.json');
-const client = new Client({intents: [Intents.FLAGS.GUILDS, Intents.FLAGS.GUILD_MESSAGE_REACTIONS, Intents.FLAGS.GUILD_MESSAGES]});
+const client = new Client({intents: [GatewayIntentBits.Guilds,
+  GatewayIntentBits.GuildMessages,
+  GatewayIntentBits.MessageContent,
+  GatewayIntentBits.GuildMembers,
+GatewayIntentBits.GuildMessageReactions]});
 const {
-  EmbedBuilder
+  PageEmbedBuilder
 } = require('../out/index');
 
-client.on('messageCreate', async message => {
+const multiFields = [{
+  name: 'test',
+  value: '123'
+}, {
+  name: 'test2',
+  value: '321'
+}];
+
+client.on(Events.MessageCreate, async message => {
   if (message.author.bot || !message.content.startsWith('test')) return;
-  const multiFields = [{
-    name: 'test',
-    value: 123
-  }, {
-    name: 'test2',
-    value: 321
-  }];
-  const help = new EmbedBuilder(message.channel);
-  const other = new EmbedBuilder(message.channel);
+  const help = new PageEmbedBuilder(message.channel);
+  const other = new PageEmbedBuilder(message.channel);
   other.calculatePages(20, 8, (embed, i) => {
-      embed.addField(i.toString() + ' other', Math.floor(Math.random() * 4).toString());
+    embed.addFields({
+      name: i.toString() + ' other',
+      value: Math.floor(Math.random() * 4).toString()
+    }).setTitle('Other Commands');
+  });
+  help.calculatePages(23, 3, (embed, i) => {
+      embed.addFields({
+        name: i.toString(),
+        value: Math.floor(Math.random() * 23).toString()
+      });
     })
-    .setTitle('Other Commands');
-  help.addFields(multiFields)
-    .calculatePages(23, 3, (embed, i) => {
-      embed.addField(i.toString(), Math.floor(Math.random() * 23).toString());
-    })
+    .addFields(multiFields)
     .addField("test", "test2")
-    .addEmoji('757146517978087444', (sent) => {
+    .addEmoji('👍', (sent) => {
       sent.channel.send('yep');
     })
     .setTitle('Commands')

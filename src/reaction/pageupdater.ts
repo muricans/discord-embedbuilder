@@ -1,5 +1,6 @@
 import { EventEmitter } from "events";
-import { TextChannel, User, MessageEmbed, MessageCollector, DMChannel } from "discord.js";
+import { TextChannel, User, MessageCollector, DMChannel, EmbedBuilder} from "discord.js";
+import {PageEmbedBuilder} from "../index";
 
 export interface PageUpdateOptions {
     /**
@@ -73,7 +74,7 @@ export class PageUpdater extends EventEmitter {
 
     private channel: TextChannel | DMChannel;
     private user: User;
-    private embedArray: MessageEmbed[];
+    private embedArray: EmbedBuilder[];
     private options: PageUpdateOptions = {
         message: '%u Please pick a page to go to.',
         cancel: true,
@@ -86,22 +87,21 @@ export class PageUpdater extends EventEmitter {
     /**
      * Create a PageUpdater to await a response from a user, and set the embedArray to the provided number.
      * ```javascript
-     * const pageUpdater = new PageUpdater(message.channel, message.author, builder.getEmbeds());
+     * const pageUpdater = new PageUpdater(pageEmbedBuilder, message.author, builder.getEmbeds());
      * pageUpdater.awaitPageUpdate()
      *  .on('cancel', (collector) => collector.stop())
      *  .on('page', (page) => builder.updatePage(page));
      * ```
      *
-     * @param channel The channel to send messages to.
+     * @param pageEmbedBuilder The PageEmbedBuilder to grab info from.
      * @param user The user this will be accepting messages from/
-     * @param embedArray The array of embeds to use.
      * @param options Options such as messages, time, cancel.
      */
-    constructor(channel: TextChannel | DMChannel, user: User, embedArray: MessageEmbed[], options?: PageUpdateOptions) {
+    constructor(pageEmbedBuilder: PageEmbedBuilder, user: User, options?: PageUpdateOptions) {
         super();
-        this.channel = channel;
+        this.channel = pageEmbedBuilder.channel;
         this.user = user;
-        this.embedArray = embedArray;
+        this.embedArray = pageEmbedBuilder.embeds;
         if (options) {
             this.options.message = options.message || this.options.message;
             this.options.cancel = options.cancel || this.options.cancel;

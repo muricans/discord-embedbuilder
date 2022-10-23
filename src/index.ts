@@ -1,2 +1,2 @@
 export * from "./reaction/pageupdater";
-export * from "./embedbuilder";
+export * from "./pageembedbuilder";

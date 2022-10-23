@@ -1,6 +1,6 @@
-/// <reference types="node" />
 import { EventEmitter } from "events";
-import { TextChannel, User, MessageEmbed, DMChannel } from "discord.js";
+import { User, MessageCollector } from "discord.js";
+import { PageEmbedBuilder } from "../index";
 export interface PageUpdateOptions {
     /**
      * The initial message to send. Use %u to reference the user.
@@ -38,6 +38,31 @@ export interface PageUpdateOptions {
  * @noInheritDoc
  */
 export declare class PageUpdater extends EventEmitter {
+    /**
+     * Emitted when it has received a valid number.
+     * @event
+     * @param page The page number received.
+     * @param content The content that contained the page number.
+     * @param collector The message collector.
+     * @param message The message that has been formatted to be sent to the user.
+     */
+    static page: (page: number, content: string, collector: MessageCollector, message: string) => void;
+    /**
+     * Emitted when it has received an invalid number or page.
+     * @event
+     * @param content The content that contained the page number.
+     * @param collector The message collector.
+     * @param message The message that has been formatted to be sent to the user.
+     */
+    static invalid: (collector: MessageCollector, content: string, message: string) => void;
+    /**
+     * Emitted when it has been canceled or it has ended.
+     * @event
+     * @param collector The message collector.
+     * @param content The content that contained the cancel keyword.
+     * @param message The message that has been formatted to be sent to the user.
+     */
+    static cancel: (collector: MessageCollector, content: string, message: string) => void;
     private channel;
     private user;
     private embedArray;
@@ -45,18 +70,17 @@ export declare class PageUpdater extends EventEmitter {
     /**
      * Create a PageUpdater to await a response from a user, and set the embedArray to the provided number.
      * ```javascript
-     * const pageUpdater = new PageUpdater(message.channel, message.author, builder.getEmbeds());
+     * const pageUpdater = new PageUpdater(pageEmbedBuilder, message.author, builder.getEmbeds());
      * pageUpdater.awaitPageUpdate()
      *  .on('cancel', (collector) => collector.stop())
      *  .on('page', (page) => builder.updatePage(page));
      * ```
      *
-     * @param channel The channel to send messages to.
+     * @param pageEmbedBuilder The PageEmbedBuilder to grab info from.
      * @param user The user this will be accepting messages from/
-     * @param embedArray The array of embeds to use.
      * @param options Options such as messages, time, cancel.
      */
-    constructor(channel: TextChannel | DMChannel, user: User, embedArray: MessageEmbed[], options?: PageUpdateOptions);
+    constructor(pageEmbedBuilder: PageEmbedBuilder, user: User, options?: PageUpdateOptions);
     /**
      * Awaits a page update.
      * @emits page
@@ -64,6 +88,4 @@ export declare class PageUpdater extends EventEmitter {
      * @emits cancel
      */
     awaitPageUpdate(): this;
-}
-export declare namespace PageUpdater {
 }

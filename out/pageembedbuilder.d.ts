@@ -1,5 +1,4 @@
-/// <reference types="node" />
-import { TextChannel, MessageEmbed, Message, ColorResolvable, DMChannel, User, EmbedFieldData } from "discord.js";
+import { TextChannel, EmbedBuilder, Message, ColorResolvable, ReactionCollector, DMChannel, Collection, MessageReaction, User, APIEmbedField } from "discord.js";
 import { EventEmitter } from "events";
 import { PageUpdateOptions } from './reaction/pageupdater';
 /**
@@ -11,7 +10,27 @@ interface Emojis {
 /**
  * @noInheritDoc
  */
-export declare class EmbedBuilder extends EventEmitter {
+export declare class PageEmbedBuilder extends EventEmitter {
+    /**
+     * Emitted when the builder has stopped
+     * @event
+     */
+    static stop: (sent: Message, lastPage: number, collector: ReactionCollector) => void;
+    /**
+     * Emitted when the builder is finished creating the first page.
+     * @event
+     */
+    static create: (sent: Message, reactions: Collection<string, MessageReaction>) => void;
+    /**
+     * Emitted when the page for the builder has updated.
+     * @event
+     */
+    static pageUpdate: (page: number) => void;
+    /**
+     * Emitted before the first embed has been sent.
+     * @event
+     */
+    static preSend: (reactions: Map<string, boolean>) => void;
     /**
      * The channel being used with the EmbedBuilder.
      */
@@ -19,7 +38,7 @@ export declare class EmbedBuilder extends EventEmitter {
     /**
      * All embeds in the builder.
      */
-    embeds: MessageEmbed[];
+    embeds: EmbedBuilder[];
     private hasColor;
     private endColor;
     private emojis;
@@ -38,17 +57,7 @@ export declare class EmbedBuilder extends EventEmitter {
     private usingPageNumber;
     private pageFormat;
     /**
-    * Builds an embed with a number of pages based on how many are in the MessageEmbed array given.
-    * ```javascript
-    * const myEmbeds = [new Discord.MessageEmbed().addField('This is', 'a field!'),
-    *  new Discord.MessageEmbed().addField('This is', 'another field!')];
-    * embedBuilder
-    *  .setChannel(message.channel)
-    *  .setTime(30000)
-    *  .setEmbeds(myEmbeds)
-    *  .build();
-    * // returns -> an embed with 2 pages that will listen for reactions for a total of 30 seconds. embed will be sent to channel specified.
-    * ```
+    * Builds an embed with a number of pages based on how many are in the EmbedBuilder array given.
     */
     constructor(channel: TextChannel | DMChannel);
     /**
@@ -57,7 +66,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * // This will generate a builder with a data length set to an array
      * // It will have 10 fields per page, which will all be inline, containing username and points data.
      * embedBuilder.calculatePages(users.length, 10, (embed, i) => {
-     *  embed.addField(users[i].username, users[i].points, true);
+     *  embed.addFields({name: users[i].username, value: users[i].points, inline: true});
      * });
      * ```
      *
@@ -65,7 +74,7 @@ export declare class EmbedBuilder extends EventEmitter {
      * @param dataPerPage This is how much data you want displayed per page.
      * @param insert Gives you an embed and the current index.
      */
-    calculatePages(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => void): this;
+    calculatePages(data: number, dataPerPage: number, insert: (embed: EmbedBuilder, index: number) => void): this;
     /**
     * Async version of calculatePages
     *
@@ -73,7 +82,7 @@ export declare class EmbedBuilder extends EventEmitter {
     * ```javascript
     * await embedBuilder.calculatePagesAsync(users.length, 10, async (embed, i) => {
     *  const user = await getSomeUser(users[i]);
-    *  embed.addField(user.username, user.points, true);
+    *  embed.addFields({name: users.username, value: users.points, inline: true});
     * });
     * ```
     *
@@ -81,7 +90,7 @@ export declare class EmbedBuilder extends EventEmitter {
     * @param dataPerPage This is how much data you want displayed per page.
     * @param insert Gives you an embed and the current index.
     */
-    calculatePagesAsync(data: number, dataPerPage: number, insert: (embed: MessageEmbed, index: number) => Promise<void>): Promise<this>;
+    calculatePagesAsync(data: number, dataPerPage: number, insert: (embed: EmbedBuilder, index: number) => Promise<void>): Promise<this>;
     /**
      *
      * @param use Use the page system for the embed.
@@ -117,12 +126,12 @@ export declare class EmbedBuilder extends EventEmitter {
      *
      * @param embeds The embeds given here will be put at the end of the current embed array.
      */
-    concatEmbeds(embeds: MessageEmbed[]): this;
+    concatEmbeds(embeds: EmbedBuilder[]): this;
     /**
      *
      * @param embeds The array of embeds to use.
      */
-    setEmbeds(embeds: MessageEmbed[]): this;
+    setEmbeds(embeds: EmbedBuilder[]): this;
     /**
      *
      * @param time The amount of time the bot will allow reactions for. (ms)
@@ -151,27 +160,27 @@ export declare class EmbedBuilder extends EventEmitter {
      *
      * @param embed The embed to push to the array of embeds.
      */
-    addEmbed(embed: MessageEmbed): this;
+    addEmbed(embed: EmbedBuilder): this;
     setTitle(title: string): this;
-    setFooter(text: any, icon?: string): this;
-    setDescription(description: any): this;
+    setFooter(text: string, icon?: string): this;
+    setDescription(description: string): this;
     setImage(url: string): this;
     setThumbnail(url: string): this;
-    spliceFields(index: number, deleteCount: number, fields?: EmbedFieldData[]): this;
+    spliceFields(index: number, deleteCount: number, field: APIEmbedField): this;
     /**
      * Adds a single field to all embeds.
      * @param name Name of the field
      * @param value Value of the field
      * @param inline Inline?
      */
-    addField(name: any, value: any, inline?: boolean): this;
+    addField(name: string, value: string, inline?: boolean): this;
     /**
      * Adds multiple fields to all embeds.
-     * @param fields An array of EmbedFieldData
+     * @param fields An array of APIEmbedField
      */
-    addFields(fields: EmbedFieldData[]): this;
+    addFields(fields: APIEmbedField[]): this;
     setURL(url: string): this;
-    setAuthor(name: any, icon?: string, url?: string): this;
+    setAuthor(name: string, icon?: string, url?: string): this;
     setTimestamp(timestamp?: Date | number): this;
     /**
      * @ignore
@@ -196,7 +205,7 @@ export declare class EmbedBuilder extends EventEmitter {
      */
     private _setColor;
     /**
-     * Cancels the EmbedBuilder
+     * Cancels the builder
      * @emits stop
      */
     cancel(callback?: () => void): this;
@@ -237,6 +246,18 @@ export declare class EmbedBuilder extends EventEmitter {
      */
     awaitPageUpdate(user: User, options?: PageUpdateOptions): this;
     /**
+     * @ignore
+     */
+    private _checkReactionEmojis;
+    /**
+     * @ignore
+     */
+    private _handleReactionCollection;
+    /**
+     * @ignore
+     */
+    private _handleTimer;
+    /**
      * Builds the embed.
      * @emits stop
      * @emits create
@@ -245,7 +266,5 @@ export declare class EmbedBuilder extends EventEmitter {
      * @listens pageUpdate
      */
     build(): Promise<this>;
-}
-export declare namespace EmbedBuilder {
 }
 export {};

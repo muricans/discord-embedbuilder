@@ -11,18 +11,18 @@ npm module to make creating embeds with mutliple pages a little bit easier
 
 ## Quick Install
 
-discord-embedbuilder v3.4.0 (current stable)
+discord-embedbuilder v4.0.0(current stable)
 
 `npm install discord-embedbuilder`
 
-discord-embedbuilder master (v3.4.0)
+discord-embedbuilder master (v4.0.0)
 
 `npm install muricans/discord-embedbuilder`
 
-discord-embedbuilder uses the latest stable version of discord.js (13.1.0)
+discord-embedbuilder uses the latest stable version of discord.js (14.6.0)
 
 ## Methods
-All methods that have the same names as the ones from [MessageEmbed](https://discord.js.org/#/docs/main/stable/class/MessageEmbed) do the same actions as those, but applies it to all of the pages, which should override their values.
+All methods that have the same names as the ones from [EmbedBuilder](https://discord.js.org/#/docs/builders/main/class/EmbedBuilder) do the same actions as those, but applies it to all of the pages, which should override their values.
 
 ### `usePages(use)`
 
@@ -40,13 +40,13 @@ Change the current channel.
 
 ### `setEmbeds(embeds)`
 
-The array of MessageEmbeds put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
+The array of EmbedBuilders put here will be the ones that are used to make the pages. You can also add embeds using addEmbed.
 
 <hr/>
 
 ### `addEmbed(embed)`
 
-Adds a MessageEmbed to the array of embeds.
+Adds an EmbedBuilder to the array of embeds.
 
 <hr/>
 
@@ -218,19 +218,19 @@ embedBuilder.defaultReactions(['stop', 'back']);
 <hr/>
 
 ## Events
-### [`create`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#create)
+### [`create`](http://github.muricans.xyz/embedbuilder/classes/PageEmbedBuilder.html#create)
 
 Emitted from build() when the first page has finished building.
 
-### [`stop`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#stop)
+### [`stop`](http://github.muricans.xyz/embedbuilder/classes/PageEmbedBuilder.html#stop)
 
 Emitted from build() when the timer has run out, or the collector is canceled in any way.
 
-### [`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#pageupdate)
+### [`pageUpdate`](http://github.muricans.xyz/embedbuilder/classes/PageEmbedBuilder.html#pageupdate)
 
 Emitted from from build() when the builder has changed pages. Sets the new page for the bot.
 
-### [`preSend`](http://github.muricans.xyz/embedbuilder/classes/EmbedBuilder.html#presend)
+### [`preSend`](http://github.muricans.xyz/embedbuilder/classes/PageEmbedBuilder.html#presend)
 
 Emitted from build() before the first embed page has been sent in Discord.
 
@@ -242,23 +242,23 @@ First import discord-embedbuilder into your project.
 
 ```javascript
 const {
-    EmbedBuilder,
+    PageEmbedBuilder,
  } = require('discord-embedbuilder');
 ```
 
 Create a command or some way to get a channel to pass through the builder. If you are unsure on how to make a command, checking [this](https://discordjs.guide/) out might be helpful.
 
-Next make your embedbuilder.
+Next make your PageEmbedBuilder.
 
 ```javascript
 client.on('message', message => {
-    const builder = new EmbedBuilder()
+    const builder = new PageEmbedBuilder()
         .setChannel(message.channel)
         .setTime(60000); // Time is in milliseconds
     const myEmbedArray = [
-        new Discord.MessageEmbed().addField('1st', 'page'),
-        new Discord.MessageEmbed().addField('2nd', 'page'), 
-        new Discord.MessageEmbed().addField('3rd', 'page'),
+        new Discord.EmbedBuilder().addFields({name:'1st', value:'page'}),
+        new Discord.EmbedBuilder().addFields({name:'2nd', value:'page'}), 
+        new Discord.EmbedBuilder().addFields({name:'3rd', value:'page'}),
     ];
     builder
         .setEmbeds(myEmbedArray)
@@ -273,7 +273,7 @@ Here's an example taken from my bot [rolesbot](https://github.com/muricans/roles
 const rolebot = require('../rolebot');
 const fs = require('fs');
 const {
-    EmbedBuilder,
+    PageEmbedBuilder,
 } = require('discord-embedbuilder');
 
 module.exports = {
@@ -285,7 +285,7 @@ module.exports = {
         const messages = JSON.parse(fs.readFileSync('./messages.json', 'utf-8'));
         const list = messages.ids.filter(v => v.guildId === message.guild.id);
         if (list.length > 0) {
-            const builder = new EmbedBuilder(message.channel);
+            const builder = new PageEmbedBuilder(message.channel);
             const guild = await message.guild.fetch();
             builder.calculatePages(list.length, 8, async (embed, i) => {
                     const channelName = guild.channels.cache.get(list[i].channelId);
